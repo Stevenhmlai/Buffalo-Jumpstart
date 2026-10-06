@@ -14,6 +14,7 @@ const limiter = (max) => rateLimit({
 });
 
 router.get('/', (req, res) => res.redirect(req.user ? '/course' : '/login'));
+router.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy policy' }));
 
 // ---------- Login ----------
 router.get('/login', (req, res) => {
