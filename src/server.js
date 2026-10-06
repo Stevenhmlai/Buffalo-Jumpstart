@@ -32,6 +32,8 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
+// Changes on every deploy so browsers fetch fresh CSS/JS despite the 7-day cache
+const ASSET_VERSION = (process.env.RAILWAY_DEPLOYMENT_ID || String(Date.now())).slice(0, 12);
 app.use('/static', express.static(path.join(__dirname, '..', 'public'), { maxAge: PROD ? '7d' : 0 }));
 app.use(express.urlencoded({ extended: true, limit: '200kb' }));
 app.use(express.json({ limit: '200kb' }));
@@ -46,6 +48,7 @@ app.use(session({
 
 app.use((req, res, next) => {
   res.locals.u = util;
+  res.locals.v = ASSET_VERSION;
   res.locals.path = req.path;
   res.locals.baseUrl = require('./lib/mail').baseUrl();
   next();

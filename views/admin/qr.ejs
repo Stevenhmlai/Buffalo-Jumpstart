@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= title %> · Buffalo Jumpstart</title>
-<link rel="stylesheet" href="/static/css/app.css">
+<link rel="stylesheet" href="/static/css/app.css?v=<%= v %>">
 </head>
 <body>
 <main class="qr-screen">
@@ -18,6 +18,6 @@
   <% if (!open) { %><div class="alert alert-warn">Check-in is not open right now. It opens 1 hour before the workshop starts.</div><% } %>
   <p style="font-size:20px"><b data-count-url="/admin/batches/<%= b.id %>/count"><%= count %></b> checked in</p>
 </main>
-<script src="/static/js/app.js"></script>
+<script src="/static/js/app.js?v=<%= v %>"></script>
 </body>
 </html>
