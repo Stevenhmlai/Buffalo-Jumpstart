@@ -5,7 +5,7 @@
   <div class="card tight stack" style="gap:10px">
     <div class="spread">
       <div>
-        <div class="eyebrow" style="font-size:12px"><%= v.kind === 'welcome' ? 'Welcome · skippable, no quiz' : v.kind === 'congrats' ? 'Congratulations · must watch to unlock certificate' : 'Module ' + n %></div>
+        <div class="eyebrow" style="font-size:12px"><%= v.kind === 'welcome' ? 'Welcome · must watch to unlock Module 1, no quiz' : v.kind === 'congrats' ? 'Congratulations · must watch to unlock certificate' : 'Module ' + n %></div>
         <div style="font-weight:700"><%= v.title %></div>
       </div>
       <% if (v.kind === 'module') { %>

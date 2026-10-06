@@ -1,5 +1,25 @@
 <%- include('../partials/admin-start') %>
 <div><h1>Settings</h1></div>
+<section class="card stack" id="email">
+  <h2>Email</h2>
+  <% if (email.connected) { %>
+    <p><span class="pill pill-green">Connected</span> Emails are sent from <b><%= email.email || 'the connected Gmail account' %></b>.</p>
+    <div class="row">
+      <form method="post" action="/admin/email/test" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn" type="submit" data-busy="Sending…">Send me a test email</button></form>
+      <a class="btn btn-ghost" href="/admin/email/connect">Reconnect</a>
+      <form method="post" action="/admin/email/disconnect" class="inline" data-confirm="Disconnect Gmail? No emails will be sent until it is connected again."><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn" type="submit">Disconnect</button></form>
+    </div>
+  <% } else if (email.apiConfigured) { %>
+    <p><span class="pill pill-red">Not connected</span> Connect the agency Gmail account so the portal can send emails.</p>
+    <p class="small muted">Sign in as the agency account (e.g. buffaloinvestmentagency@gmail.com). Google may warn that the app is unverified: choose <b>Advanced → Go to Buffalo Jumpstart</b>, then allow sending email.</p>
+    <div><a class="btn" href="/admin/email/connect">Connect Gmail</a></div>
+  <% } else { %>
+    <p><span class="pill pill-red">Not set up</span> Add <code>GMAIL_CLIENT_ID</code> and <code>GMAIL_CLIENT_SECRET</code> in Railway's Variables, then come back here and click Connect Gmail.</p>
+    <p class="small muted">Authorised redirect URI for the Google OAuth client: <b><%= email.redirectUri %></b></p>
+    <% if (email.smtp) { %><p class="small muted">A Gmail app password is set, but Railway's Hobby plan blocks that kind of connection, so it is only used as a fallback.</p><% } %>
+  <% } %>
+  <% if (email.lastError) { %><div class="alert alert-warn small">Last email error: <%= email.lastError %></div><% } %>
+</section>
 <section class="card stack">
   <h2>"Next steps" text</h2>
   <p class="small muted">Shown to members with their certificate after they complete the course.</p>

@@ -1,7 +1,7 @@
 <%- include('../partials/admin-start') %>
 <div class="page-head" style="margin:0">
   <div><h1>Dashboard</h1><p>Buffalo Jumpstart · all enrolled members</p></div>
-  <a class="btn btn-ghost" href="/admin/export/agents.xlsx"><%- u.icon('download', 16) %>Export agents to Excel</a>
+  <a class="btn btn-ghost" href="/admin/export/advisers.xlsx"><%- u.icon('download', 16) %>Export advisers to Excel</a>
 </div>
 
 <% if (adminCounts.pending) { %>
@@ -12,7 +12,7 @@
   <div class="card stat"><span class="lbl">In training</span><span class="num"><%= inTraining %></span></div>
   <div class="card stat good"><span class="lbl">Completed this month</span><span class="num"><%= completedThisMonth %></span></div>
   <div class="card stat"><span class="lbl">Avg. days to complete</span><span class="num"><%= avgDays === null ? '—' : avgDays %></span></div>
-  <a class="card stat warn" href="/admin/agents?s=idle" style="text-decoration:none;color:inherit"><span class="lbl">Idle 7+ days</span><span class="num"><%= idle %></span></a>
+  <a class="card stat warn" href="/admin/advisers?s=idle" style="text-decoration:none;color:inherit"><span class="lbl">Idle 7+ days</span><span class="num"><%= idle %></span></a>
 </div>
 
 <div class="grid-2" style="grid-template-columns:minmax(0,3fr) minmax(0,2fr)">

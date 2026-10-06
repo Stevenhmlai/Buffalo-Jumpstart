@@ -28,7 +28,7 @@
   </div>
   <form method="post" action="/admin/batches/<%= b.id %>/mark" class="row" style="align-items:flex-end">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
-    <div class="field" style="min-width:220px"><label for="mark">Mark present by agent code</label><input id="mark" name="code" type="text" placeholder="e.g. BIA2031" required></div>
+    <div class="field" style="min-width:220px"><label for="mark">Mark present by adviser code</label><input id="mark" name="code" type="text" placeholder="e.g. BIA2031" required></div>
     <button class="btn btn-ghost" type="submit">Mark present</button>
   </form>
 
@@ -38,7 +38,7 @@
       <% if (!attendees.length) { %><p class="small muted">No check-ins yet.</p><% } %>
       <% attendees.forEach(function (p) { %>
         <div class="spread small" style="border-bottom:1px solid #F0EAE0;padding:4px 0">
-          <span><a href="/admin/agents/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.method === 'qr' ? 'QR' : 'manual' %></span></span>
+          <span><a href="/admin/advisers/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.method === 'qr' ? 'QR' : 'manual' %></span></span>
           <form method="post" action="/admin/batches/<%= b.id %>/unmark/<%= p.id %>" class="inline" data-confirm="Remove <%= p.name %>'s workshop attendance?">
             <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn tiny" type="submit">Remove</button>
           </form>
@@ -49,7 +49,7 @@
       <h3><%= workshopOver ? 'Registered but absent' : 'Registered, not checked in' %> (<%= registeredAbsent.length %>)</h3>
       <% if (!registeredAbsent.length) { %><p class="small muted">Nobody.</p><% } %>
       <% registeredAbsent.forEach(function (p) { %>
-        <div class="small" style="border-bottom:1px solid #F0EAE0;padding:4px 0"><a href="/admin/agents/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.mobile || '' %></span></div>
+        <div class="small" style="border-bottom:1px solid #F0EAE0;padding:4px 0"><a href="/admin/advisers/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.mobile || '' %></span></div>
       <% }) %>
     </div>
   </div>
@@ -85,7 +85,7 @@
       </form>
       <form method="post" action="/admin/zoom/<%= z.id %>/mark" class="row" style="align-items:flex-end">
         <input type="hidden" name="_csrf" value="<%= csrf %>">
-        <div class="field" style="min-width:220px"><label for="zm<%= z.id %>">Mark present by agent code</label><input id="zm<%= z.id %>" name="code" type="text" required></div>
+        <div class="field" style="min-width:220px"><label for="zm<%= z.id %>">Mark present by adviser code</label><input id="zm<%= z.id %>" name="code" type="text" required></div>
         <button class="btn btn-ghost btn-sm" type="submit">Mark present</button>
       </form>
       <div class="table-wrap"><table class="t">

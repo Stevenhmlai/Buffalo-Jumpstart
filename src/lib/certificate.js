@@ -57,7 +57,7 @@ function certificatePdf(stream, { name, code, date }) {
   y += size + 8;
   doc.moveTo(W / 2 - 200, y).lineTo(W / 2 + 200, y).lineWidth(0.8).strokeColor(GOLD).stroke();
   y += 8;
-  doc.font('body').fontSize(11).fillColor(GREY).text(`Agent code ${code}`, 0, y, { width: W, align: 'center' });
+  doc.font('body').fontSize(11).fillColor(GREY).text(`Adviser code ${code}`, 0, y, { width: W, align: 'center' });
   y += 24;
   doc.font('body').fontSize(12.5).fillColor('#333333').text(
     'has completed all training modules and passed every quiz in the Buffalo Jumpstart programme of Buffalo Investment Agency.',

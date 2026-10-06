@@ -14,7 +14,7 @@
         <input id="name" name="name" type="text" autocomplete="name" value="<%= form.name || '' %>" required>
       </div>
       <div class="field">
-        <label for="code">Your agent code</label>
+        <label for="code">Your adviser code</label>
         <input id="code" name="code" type="text" autocapitalize="characters" value="<%= form.code || '' %>" required>
         <span class="hint">You'll use this to log in.</span>
       </div>
@@ -27,7 +27,7 @@
         <input id="mobile" name="mobile" type="tel" autocomplete="tel" placeholder="012-345 6789" value="<%= form.mobile || '' %>" required>
       </div>
       <div class="field">
-        <label for="upline">Your upline's agent code</label>
+        <label for="upline">Your upline's adviser code</label>
         <input id="upline" name="upline" type="text" autocapitalize="characters" value="<%= form.upline || '' %>" data-upline-input required>
         <span class="upline-check" data-upline-result aria-live="polite"></span>
       </div>

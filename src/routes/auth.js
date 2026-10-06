@@ -26,7 +26,7 @@ router.post('/login', limiter(20), async (req, res) => {
   const password = String(req.body.password || '');
   const u = await one('SELECT * FROM users WHERE upper(agent_code)=$1', [code]);
   const ok = u && (await bcrypt.compare(password, u.password_hash));
-  if (!ok) return res.status(400).render('login', { title: 'Log in', error: 'Agent code or password is incorrect.', code });
+  if (!ok) return res.status(400).render('login', { title: 'Log in', error: 'Adviser code or password is incorrect.', code });
   if (u.status === 'pending') return res.status(400).render('login', { title: 'Log in', error: 'Your registration is still waiting for admin approval. You will get an email once it is approved.', code });
   if (u.status === 'rejected') return res.status(400).render('login', { title: 'Log in', error: 'Your registration was not approved. Please contact your upline or the agency.', code });
   if (u.status !== 'active') return res.status(400).render('login', { title: 'Log in', error: 'This account is no longer active. Please contact the agency.', code });
@@ -66,18 +66,18 @@ router.post('/register', limiter(10), async (req, res) => {
   const password2 = String(req.body.password2 || '');
   const errors = [];
   if (form.name.length < 2) errors.push('Please enter your full name.');
-  if (!/^[A-Z0-9-]{3,20}$/.test(form.code)) errors.push('Please enter a valid agent code (letters and numbers only).');
+  if (!/^[A-Z0-9-]{3,20}$/.test(form.code)) errors.push('Please enter a valid adviser code (letters and numbers only).');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errors.push('Please enter a valid email address.');
   if (form.mobile.replace(/\D/g, '').length < 9) errors.push('Please enter a valid mobile number.');
-  if (!form.upline) errors.push("Please enter your upline's agent code.");
+  if (!form.upline) errors.push("Please enter your upline's adviser code.");
   if (form.upline && form.upline === form.code) errors.push('Your upline code cannot be your own code.');
   if (password.length < 8) errors.push('Password must be at least 8 characters.');
   if (password !== password2) errors.push('The two passwords do not match.');
   const existing = form.code && (await one('SELECT status FROM users WHERE upper(agent_code)=$1', [form.code]));
   if (existing) {
     errors.push(existing.status === 'pending'
-      ? 'This agent code has already registered and is waiting for approval.'
-      : 'This agent code already has an account. Try logging in, or use "Forgot password".');
+      ? 'This adviser code has already registered and is waiting for approval.'
+      : 'This adviser code already has an account. Try logging in, or use "Forgot password".');
   }
   if (errors.length) return res.status(400).render('register', { title: 'Register', errors, form });
 

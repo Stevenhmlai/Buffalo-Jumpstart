@@ -12,6 +12,17 @@
     f.addEventListener('submit', function (e) { if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
   });
 
+  // Busy state: <button data-busy="Adding…"> is disabled and relabelled once its form submits,
+  // so a slow request can't be submitted twice and the admin can see something is happening.
+  document.querySelectorAll('form').forEach(function (f) {
+    f.addEventListener('submit', function (e) {
+      if (e.defaultPrevented) return;
+      var b = f.querySelector('button[data-busy]');
+      if (!b) return;
+      setTimeout(function () { b.disabled = true; b.textContent = b.getAttribute('data-busy'); }, 0);
+    });
+  });
+
   // Upline lookup on the registration form
   var up = document.querySelector('[data-upline-input]');
   var out = document.querySelector('[data-upline-result]');

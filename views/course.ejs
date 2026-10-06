@@ -12,7 +12,7 @@
       <% if (course.welcome) { %>
         <a class="lesson welcome" href="/video/<%= course.welcome.id %>">
           <span class="ico"><%- u.icon(course.welcomeWatched ? 'check' : 'wave') %></span>
-          <span class="grow"><span class="t">Welcome message</span><span class="s"><%= course.welcomeWatched ? 'Watched · rewatch anytime' : 'Start here (optional)' %></span></span>
+          <span class="grow"><span class="t">Welcome message</span><span class="s"><%= course.welcomeWatched ? 'Watched · rewatch anytime' : 'Start here · watch to the end to unlock Module 1' %></span></span>
           <span class="chev"><%- u.icon('chev') %></span>
         </a>
       <% } %>
@@ -22,7 +22,7 @@
           <div class="lesson locked">
             <span class="ico"><%- u.icon('lock', 16) %></span>
             <span class="grow"><span class="t">Module <%= m.number %> · <%= m.title %></span>
-              <span class="s"><%= m.number > 1 ? 'Unlocks after Module ' + (m.number - 1) : 'Locked' %></span></span>
+              <span class="s"><%= m.number > 1 ? 'Unlocks after Module ' + (m.number - 1) : 'Unlocks after the Welcome message' %></span></span>
           </div>
         <% } else { %>
           <a class="lesson <%= m.state === 'done' ? 'done' : 'current' %>" href="<%= m.state === 'quiz' ? '/quiz/' + m.id : '/video/' + m.id %>">
@@ -60,6 +60,8 @@
         <div class="bar" role="progressbar" aria-valuenow="<%= course.percent %>" aria-valuemin="0" aria-valuemax="100"><span style="width:<%= course.percent %>%"></span></div>
         <% if (course.certificateReady) { %>
           <a class="btn btn-gold" href="/complete"><%- u.icon('award') %>Certificate &amp; next steps</a>
+        <% } else if (!course.welcomeDone) { %>
+          <a class="btn btn-gold" href="/video/<%= course.welcome.id %>"><%- u.icon('play', 16) %>Start with the Welcome message</a>
         <% } else if (course.next) { %>
           <a class="btn btn-gold" href="<%= course.next.state === 'quiz' ? '/quiz/' + course.next.id : '/video/' + course.next.id %>">
             <%- u.icon(course.next.state === 'quiz' ? 'quiz' : 'play', 16) %><%= course.next.state === 'quiz' ? 'Take Module ' + course.next.number + ' quiz' : 'Continue with Module ' + course.next.number %></a>
@@ -69,7 +71,7 @@
       </div>
       <div class="card stack small">
         <h3>How it works</h3>
-        <p>Watch each module to the end. Skipping and fast-forwarding are fine.</p>
+        <p>Start with the Welcome message, then watch each module to the end. Skipping and fast-forwarding are fine.</p>
         <p>Then answer every quiz question correctly to unlock the next module. You can retake a quiz as often as you need.</p>
         <p>After the last module, download your certificate and register for the next Jumpstart Workshop.</p>
       </div>

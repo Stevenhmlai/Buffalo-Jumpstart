@@ -24,6 +24,12 @@ function buildCourse(videos, prog) {
   const congrats = videos.find((v) => v.kind === 'congrats') || null;
   const modules = videos.filter((v) => v.kind === 'module');
 
+  // The welcome video must be watched before Module 1 unlocks (once it has a video).
+  // Anyone who already started the modules before this rule keeps their access.
+  const welcomeWatched = welcome ? prog.watched.has(welcome.id) : false;
+  const welcomeRequired = !!(welcome && welcome.youtube_id);
+  const welcomeDone = !welcomeRequired || welcomeWatched || modules.some((m) => prog.watched.has(m.id));
+
   // A module is "done" when its quiz is passed, or (no published quiz and the video was watched),
   // or a later module has already been watched (so a quiz published later never re-locks anyone).
   const doneFlags = new Array(modules.length).fill(false);
@@ -38,7 +44,7 @@ function buildCourse(videos, prog) {
 
   const items = modules.map((m, i) => {
     const watched = prog.watched.has(m.id);
-    const unlocked = i === 0 || doneFlags[i - 1];
+    const unlocked = i === 0 ? welcomeDone : doneFlags[i - 1];
     let state;
     if (doneFlags[i]) state = 'done';
     else if (!unlocked) state = 'locked';
@@ -55,12 +61,15 @@ function buildCourse(videos, prog) {
 
   let next = items.find((it) => it.state === 'current' || it.state === 'quiz') || null;
   let nextLabel = null;
-  if (next) nextLabel = next.state === 'quiz' ? `Module ${next.number} quiz` : `Module ${next.number}: ${next.title}`;
+  if (!welcomeDone) nextLabel = 'the Welcome message';
+  else if (next) nextLabel = next.state === 'quiz' ? `Module ${next.number} quiz` : `Module ${next.number}: ${next.title}`;
   else if (allModulesDone && congratsHasVideo && !congratsWatched) nextLabel = congrats.title;
 
   return {
     welcome,
-    welcomeWatched: welcome ? prog.watched.has(welcome.id) : false,
+    welcomeWatched,
+    welcomeRequired,
+    welcomeDone,
     modules: items,
     modulesTotal: modules.length,
     modulesDone,

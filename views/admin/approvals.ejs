@@ -17,7 +17,7 @@
       <% if (!p.upline_name) { %><span class="pill pill-gold">Upline not found</span><% } %>
     </div>
     <dl class="kv">
-      <dt>Agent code</dt><dd><%= p.agent_code %></dd>
+      <dt>Adviser code</dt><dd><%= p.agent_code %></dd>
       <dt>Email</dt><dd><%= p.email %></dd>
       <dt>Mobile</dt><dd><%= p.mobile %></dd>
       <dt>Upline entered</dt><dd><%= p.upline_code %><%= p.upline_name ? ' — ' + p.upline_name : ' (not in the portal)' %></dd>
@@ -25,10 +25,10 @@
     <form method="post" action="/admin/approvals/<%= p.id %>/approve" class="row" style="align-items:flex-end">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <div class="field" style="flex:1;min-width:200px">
-        <label for="up<%= p.id %>">Upline agent code (correct it if needed)</label>
+        <label for="up<%= p.id %>">Upline adviser code (correct it if needed)</label>
         <input id="up<%= p.id %>" name="upline" type="text" value="<%= p.upline_code %>" autocapitalize="characters">
       </div>
-      <button class="btn" type="submit">Approve</button>
+      <button class="btn" type="submit" data-busy="Approving…">Approve</button>
     </form>
     <details>
       <summary class="small" style="cursor:pointer;color:var(--red);font-weight:600;min-height:32px">Reject instead</summary>
@@ -47,7 +47,7 @@
     <thead><tr><th>Name</th><th>Code</th><th>Decision</th><th>By</th><th>When</th></tr></thead>
     <tbody>
     <% recent.forEach(function (r) { %>
-      <tr><td><a class="name" href="/admin/agents/<%= r.id %>"><%= r.name %></a></td><td><%= r.agent_code %></td>
+      <tr><td><a class="name" href="/admin/advisers/<%= r.id %>"><%= r.name %></a></td><td><%= r.agent_code %></td>
         <td><span class="pill <%= r.status === 'rejected' ? 'pill-red' : 'pill-green' %>"><%= r.status === 'rejected' ? 'Rejected' : 'Approved' %></span></td>
         <td><%= r.approver || '—' %></td><td class="small"><%= u.fmtDate(r.approved_at) %></td></tr>
     <% }) %>

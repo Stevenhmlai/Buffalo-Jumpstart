@@ -14,6 +14,7 @@ const router = express.Router();
 router.use(requireAdmin);
 
 const nav = (res, key) => { res.locals.adminNav = key; };
+const NOMAIL = ' The email could not be sent. Check Admin → Settings → Email.';
 
 async function counts() {
   return one(`SELECT
@@ -93,10 +94,11 @@ router.post('/approvals/:id/approve', async (req, res) => {
     u.upline_code = newUpline;
   }
   await q(`UPDATE users SET status='active', upline_code=$2, approved_at=now(), approved_by=$3 WHERE id=$1`, [u.id, u.upline_code, req.user.id]);
-  await mail.approved(u);
+  const sent = await mail.approved(u);
   const upline = await one(`SELECT * FROM users WHERE upper(agent_code)=upper($1) AND status='active'`, [u.upline_code]);
-  if (upline) await mail.uplineNotified(upline, u);
-  req.flash('ok', `${u.name} approved.${upline ? ' Their upline has been emailed.' : ''}`);
+  const upSent = upline ? await mail.uplineNotified(upline, u) : false;
+  if (sent) req.flash('ok', `${u.name} approved and emailed.${upSent ? ' Their upline has been emailed too.' : ''}`);
+  else req.flash('warn', `${u.name} approved.` + NOMAIL);
   res.redirect('/admin/approvals');
 });
 
@@ -105,12 +107,12 @@ router.post('/approvals/:id/reject', async (req, res) => {
   if (!u) return res.redirect('/admin/approvals');
   const reason = String(req.body.reason || '').trim();
   await q(`UPDATE users SET status='rejected', rejected_reason=$2, approved_by=$3, approved_at=now() WHERE id=$1`, [u.id, reason || null, req.user.id]);
-  await mail.rejected(u, reason);
-  req.flash('ok', `${u.name}'s registration was rejected and they have been emailed.`);
+  if (await mail.rejected(u, reason)) req.flash('ok', `${u.name}'s registration was rejected and they have been emailed.`);
+  else req.flash('warn', `${u.name}'s registration was rejected.` + NOMAIL);
   res.redirect('/admin/approvals');
 });
 
-// ================= Agents =================
+// ================= Advisers =================
 async function agentRows(where = 'TRUE', params = []) {
   const users = await all(
     `SELECT u.*, up.name AS upline_name FROM users u
@@ -132,7 +134,11 @@ async function agentRows(where = 'TRUE', params = []) {
   });
 }
 
-router.get('/agents', async (req, res) => {
+// Old links (before "agents" became "advisers")
+router.get(/^\/agents(\/.*)?$/, (req, res) => res.redirect(301, '/admin/advisers' + (req.params[0] || '')));
+router.get('/export/agents.xlsx', (req, res) => res.redirect(301, '/admin/export/advisers.xlsx'));
+
+router.get('/advisers', async (req, res) => {
   nav(res, 'agents');
   const search = String(req.query.q || '').trim();
   const status = String(req.query.s || 'all');
@@ -146,15 +152,15 @@ router.get('/agents', async (req, res) => {
   else if (status === 'completed') rows = rows.filter((r) => r.trainee && r.course.certificateReady);
   else if (status === 'inactive') rows = rows.filter((r) => r.status === 'inactive');
   else if (status === 'admins') rows = rows.filter((r) => r.is_admin);
-  res.render('admin/agents', { title: 'Agents', rows, search, status });
+  res.render('admin/agents', { title: 'Advisers', rows, search, status });
 });
 
-router.get('/agents/new', (req, res) => {
+router.get('/advisers/new', (req, res) => {
   nav(res, 'agents');
-  res.render('admin/agent-new', { title: 'Add agent', errors: [], form: { trainee: false } });
+  res.render('admin/agent-new', { title: 'Add adviser', errors: [], form: { trainee: false } });
 });
 
-router.post('/agents', async (req, res) => {
+router.post('/advisers', async (req, res) => {
   nav(res, 'agents');
   const form = {
     name: String(req.body.name || '').trim(), code: U.normCode(req.body.code),
@@ -163,10 +169,10 @@ router.post('/agents', async (req, res) => {
   };
   const errors = [];
   if (form.name.length < 2) errors.push('Enter the full name.');
-  if (!/^[A-Z0-9-]{3,20}$/.test(form.code)) errors.push('Enter a valid agent code.');
+  if (!/^[A-Z0-9-]{3,20}$/.test(form.code)) errors.push('Enter a valid adviser code.');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) errors.push('Enter a valid email (needed to set their password).');
-  if (await one('SELECT 1 FROM users WHERE upper(agent_code)=$1', [form.code])) errors.push('That agent code already exists.');
-  if (errors.length) return res.status(400).render('admin/agent-new', { title: 'Add agent', errors, form });
+  if (await one('SELECT 1 FROM users WHERE upper(agent_code)=$1', [form.code])) errors.push('That adviser code already exists.');
+  if (errors.length) return res.status(400).render('admin/agent-new', { title: 'Add adviser', errors, form });
   const randomPw = await bcrypt.hash(U.randomToken(), 10);
   const u = await one(
     `INSERT INTO users (agent_code, name, email, mobile, upline_code, password_hash, status, is_admin, trainee, approved_at, approved_by)
@@ -174,16 +180,16 @@ router.post('/agents', async (req, res) => {
     [form.code, form.name, form.email, form.mobile, form.upline || null, randomPw, form.is_admin, form.trainee, req.user.id]);
   const token = U.randomToken();
   await q(`INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1,$2, now() + interval '7 days')`, [U.sha256(token), u.id]);
-  await mail.welcomeSetPassword(u, token);
-  req.flash('ok', `${u.name} added. They have been emailed a link to set their password.`);
-  res.redirect('/admin/agents/' + u.id);
+  if (await mail.welcomeSetPassword(u, token)) req.flash('ok', `${u.name} has been added and emailed a link to set their password.`);
+  else req.flash('warn', `${u.name} has been added, but the set-password email could not be sent. Use "Email a set-password link" below once email is working.`);
+  res.redirect('/admin/advisers/' + u.id);
 });
 
-router.get('/agents/:id', async (req, res) => {
+router.get('/advisers/:id', async (req, res) => {
   nav(res, 'agents');
   const rows = await agentRows('u.id=$1', [req.params.id]);
   const a = rows[0];
-  if (!a) return res.redirect('/admin/agents');
+  if (!a) return res.redirect('/admin/advisers');
   const group = await groupOf(a.agent_code);
   const direct = await directDownlines(a.agent_code);
   const attempts = await all(
@@ -200,9 +206,9 @@ router.get('/agents/:id', async (req, res) => {
   res.render('admin/agent', { title: a.name, a, groupSize: group.length, direct, attempts, workshops, zooms, changes, uplineUser });
 });
 
-router.post('/agents/:id', async (req, res) => {
+router.post('/advisers/:id', async (req, res) => {
   const a = await one('SELECT * FROM users WHERE id=$1', [req.params.id]);
-  if (!a) return res.redirect('/admin/agents');
+  if (!a) return res.redirect('/admin/advisers');
   const name = String(req.body.name || '').trim() || a.name;
   const email = String(req.body.email || '').trim().toLowerCase();
   const mobile = String(req.body.mobile || '').trim();
@@ -211,19 +217,19 @@ router.post('/agents/:id', async (req, res) => {
   await q('UPDATE users SET name=$2, email=$3, mobile=$4, trainee=$5, is_admin=$6 WHERE id=$1',
     [a.id, name, email, mobile, !!req.body.trainee, isAdmin]);
   if (!req.session.flash) req.flash('ok', 'Details saved.');
-  res.redirect('/admin/agents/' + a.id);
+  res.redirect('/admin/advisers/' + a.id);
 });
 
-router.post('/agents/:id/upline', async (req, res) => {
+router.post('/advisers/:id/upline', async (req, res) => {
   const a = await one('SELECT * FROM users WHERE id=$1', [req.params.id]);
-  if (!a) return res.redirect('/admin/agents');
+  if (!a) return res.redirect('/admin/advisers');
   const nu = U.normCode(req.body.upline) || null;
-  if (nu && nu === U.normCode(a.agent_code)) { req.flash('warn', 'An agent cannot be their own upline.'); return res.redirect('/admin/agents/' + a.id); }
+  if (nu && nu === U.normCode(a.agent_code)) { req.flash('warn', 'An adviser cannot be their own upline.'); return res.redirect('/admin/advisers/' + a.id); }
   if (nu) {
     const below = await groupOf(a.agent_code);
     if (below.some((m) => U.normCode(m.agent_code) === nu)) {
       req.flash('warn', `${nu} is in ${a.name}'s own group, so it can't be their upline.`);
-      return res.redirect('/admin/agents/' + a.id);
+      return res.redirect('/admin/advisers/' + a.id);
     }
   }
   if (U.normCode(a.upline_code) !== (nu || '')) {
@@ -232,12 +238,12 @@ router.post('/agents/:id/upline', async (req, res) => {
       [a.id, a.upline_code, nu, req.user.id, String(req.body.note || '').trim() || null]);
     req.flash('ok', `Upline changed to ${nu || 'none'}. ${a.name}'s whole group moved with them.`);
   }
-  res.redirect('/admin/agents/' + a.id);
+  res.redirect('/admin/advisers/' + a.id);
 });
 
-router.post('/agents/:id/deactivate', async (req, res) => {
+router.post('/advisers/:id/deactivate', async (req, res) => {
   const a = await one('SELECT * FROM users WHERE id=$1', [req.params.id]);
-  if (!a || a.id === req.user.id) return res.redirect('/admin/agents');
+  if (!a || a.id === req.user.id) return res.redirect('/admin/advisers');
   const moveTo = U.normCode(req.body.move_to) || U.normCode(a.upline_code) || null;
   const direct = await all(`SELECT * FROM users WHERE upper(upline_code)=upper($1) AND status IN ('active','pending')`, [a.agent_code]);
   const client = await pool.connect();
@@ -252,24 +258,24 @@ router.post('/agents/:id/deactivate', async (req, res) => {
     await client.query('COMMIT');
   } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
   req.flash('ok', `${a.name} deactivated.${direct.length ? ` ${direct.length} direct downline(s) moved to ${moveTo || 'no upline'}.` : ''} Training records are kept.`);
-  res.redirect('/admin/agents/' + a.id);
+  res.redirect('/admin/advisers/' + a.id);
 });
 
-router.post('/agents/:id/reactivate', async (req, res) => {
+router.post('/advisers/:id/reactivate', async (req, res) => {
   await q(`UPDATE users SET status='active', deactivated_at=NULL WHERE id=$1 AND status='inactive'`, [req.params.id]);
   req.flash('ok', 'Account reactivated.');
-  res.redirect('/admin/agents/' + req.params.id);
+  res.redirect('/admin/advisers/' + req.params.id);
 });
 
-router.post('/agents/:id/send-reset', async (req, res) => {
+router.post('/advisers/:id/send-reset', async (req, res) => {
   const a = await one(`SELECT * FROM users WHERE id=$1 AND status='active'`, [req.params.id]);
   if (a) {
     const token = U.randomToken();
     await q(`INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1,$2, now() + interval '7 days')`, [U.sha256(token), a.id]);
-    await mail.welcomeSetPassword(a, token);
-    req.flash('ok', `Password link emailed to ${a.email}.`);
+    if (await mail.welcomeSetPassword(a, token)) req.flash('ok', `Password link emailed to ${a.email}.`);
+    else req.flash('warn', `The password link could not be emailed to ${a.email}. Check Admin → Settings → Email.`);
   }
-  res.redirect('/admin/agents/' + req.params.id);
+  res.redirect('/admin/advisers/' + req.params.id);
 });
 
 router.get('/changes', async (req, res) => {
@@ -507,7 +513,7 @@ async function userByCode(code) {
 router.post('/batches/:id/mark', async (req, res) => {
   const b = await one('SELECT * FROM batches WHERE id=$1', [req.params.id]);
   const u = b && (await userByCode(req.body.code));
-  if (!u) { req.flash('warn', 'No active member with that agent code.'); return res.redirect('/admin/batches/' + req.params.id + '#workshop'); }
+  if (!u) { req.flash('warn', 'No active member with that adviser code.'); return res.redirect('/admin/batches/' + req.params.id + '#workshop'); }
   await q(`INSERT INTO workshop_attendance (user_id, batch_id, method, recorded_by) VALUES ($1,$2,'manual',$3) ON CONFLICT DO NOTHING`, [u.id, b.id, req.user.id]);
   await q('INSERT INTO workshop_registrations (user_id, batch_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [u.id, b.id]);
   req.flash('ok', `${u.name} marked present at the workshop.`);
@@ -523,7 +529,7 @@ router.post('/batches/:id/unmark/:uid', async (req, res) => {
 router.post('/zoom/:id/mark', async (req, res) => {
   const z = await one('SELECT * FROM zoom_sessions WHERE id=$1', [req.params.id]);
   const u = z && (await userByCode(req.body.code));
-  if (!u) { req.flash('warn', 'No active member with that agent code.'); return res.redirect('/admin/batches/' + (z ? z.batch_id : '')); }
+  if (!u) { req.flash('warn', 'No active member with that adviser code.'); return res.redirect('/admin/batches/' + (z ? z.batch_id : '')); }
   await q(`INSERT INTO zoom_attendance (user_id, zoom_session_id, method, recorded_by) VALUES ($1,$2,'manual',$3) ON CONFLICT DO NOTHING`, [u.id, z.id, req.user.id]);
   req.flash('ok', `${u.name} marked present for Zoom session ${z.seq}.`);
   res.redirect('/admin/batches/' + z.batch_id + '#zoom' + z.seq);
@@ -560,7 +566,7 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(`Batch ${det.b.number}`);
   ws.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Agent code', key: 'code', width: 14 },
+    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Upline name', key: 'upline_name', width: 24 },
     { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
     { header: 'Videos completed', key: 'completed', width: 16 },
@@ -587,7 +593,7 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
   styleSheet(ws);
   const ws2 = wb.addWorksheet('Registered, absent');
   ws2.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Agent code', key: 'code', width: 14 },
+    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
   ];
   for (const p of det.registeredAbsent) ws2.addRow({ name: p.name, code: p.agent_code, upline: p.upline_code || '', email: p.email, mobile: p.mobile || '' });
@@ -595,16 +601,16 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
   await sendWorkbook(res, wb, `Jumpstart-Batch-${det.b.number}.xlsx`);
 });
 
-router.get('/export/agents.xlsx', async (req, res) => {
+router.get('/export/advisers.xlsx', async (req, res) => {
   const rows = await agentRows(`u.status IN ('active','inactive')`);
   const videos = await progress.getVideos();
   const modules = videos.filter((v) => v.kind === 'module');
   const zc = await all('SELECT user_id, count(*)::int AS n FROM zoom_attendance GROUP BY 1');
   const zoomCount = Object.fromEntries(zc.map((x) => [x.user_id, x.n]));
   const wb = new ExcelJS.Workbook();
-  const ws = wb.addWorksheet('Agents');
+  const ws = wb.addWorksheet('Advisers');
   ws.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Agent code', key: 'code', width: 14 },
+    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Upline name', key: 'upline_name', width: 24 },
     { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
     { header: 'Account', key: 'account', width: 10 }, { header: 'Enrolled', key: 'trainee', width: 10 },
@@ -626,13 +632,46 @@ router.get('/export/agents.xlsx', async (req, res) => {
     ws.addRow(row);
   }
   styleSheet(ws);
-  await sendWorkbook(res, wb, `Jumpstart-Agents-${d(new Date())}.xlsx`);
+  await sendWorkbook(res, wb, `Jumpstart-Advisers-${d(new Date())}.xlsx`);
 });
 
 // ================= Settings =================
 router.get('/settings', async (req, res) => {
   nav(res, 'settings');
-  res.render('admin/settings', { title: 'Settings', nextSteps: await getSetting('next_steps') });
+  res.render('admin/settings', { title: 'Settings', nextSteps: await getSetting('next_steps'), email: await mail.status() });
+});
+
+// ----- Email (Gmail API) -----
+router.get('/email/connect', (req, res) => {
+  if (!mail.apiConfigured()) { req.flash('warn', 'Add GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET in Railway first.'); return res.redirect('/admin/settings#email'); }
+  req.session.gmailState = U.randomToken(16);
+  res.redirect(mail.authUrl(req.session.gmailState));
+});
+
+router.get('/email/callback', async (req, res) => {
+  const state = req.session.gmailState;
+  delete req.session.gmailState;
+  if (req.query.error) { req.flash('warn', `Gmail was not connected (${req.query.error}).`); return res.redirect('/admin/settings#email'); }
+  if (!state || req.query.state !== state || !req.query.code) { req.flash('warn', 'Gmail connection expired. Please try again.'); return res.redirect('/admin/settings#email'); }
+  try {
+    const email = await mail.connect(String(req.query.code));
+    req.flash('ok', `Gmail connected${email ? ' (' + email + ')' : ''}. Send a test email to check.`);
+  } catch (e) {
+    req.flash('warn', e.message);
+  }
+  res.redirect('/admin/settings#email');
+});
+
+router.post('/email/test', async (req, res) => {
+  if (await mail.testEmail(req.user.email)) req.flash('ok', `Test email sent to ${req.user.email}. Check your inbox.`);
+  else req.flash('warn', 'The test email failed. See the error under Email below.');
+  res.redirect('/admin/settings#email');
+});
+
+router.post('/email/disconnect', async (req, res) => {
+  await mail.disconnect();
+  req.flash('ok', 'Gmail disconnected. No emails will be sent until it is connected again.');
+  res.redirect('/admin/settings#email');
 });
 
 router.post('/settings', async (req, res) => {

@@ -1,11 +1,11 @@
 <%- include('../partials/admin-start') %>
-<div><a href="/admin/agents" class="small">← Agents</a><h1 style="margin-top:6px">Upline change log</h1></div>
+<div><a href="/admin/advisers" class="small">← Advisers</a><h1 style="margin-top:6px">Upline change log</h1></div>
 <div class="table-wrap"><table class="t">
-  <thead><tr><th>When</th><th>Agent</th><th>From</th><th>To</th><th>By</th><th>Note</th></tr></thead>
+  <thead><tr><th>When</th><th>Adviser</th><th>From</th><th>To</th><th>By</th><th>Note</th></tr></thead>
   <tbody>
   <% if (!rows.length) { %><tr><td colspan="6" class="muted">No upline changes yet.</td></tr><% } %>
   <% rows.forEach(function (r) { %>
-    <tr><td class="small"><%= u.fmtDateTime(r.changed_at) %></td><td><a class="name" href="/admin/agents/<%= r.user_id %>"><%= r.name %></a><div class="sub"><%= r.agent_code %></div></td>
+    <tr><td class="small"><%= u.fmtDateTime(r.changed_at) %></td><td><a class="name" href="/admin/advisers/<%= r.user_id %>"><%= r.name %></a><div class="sub"><%= r.agent_code %></div></td>
       <td><%= r.old_upline || '—' %></td><td><b><%= r.new_upline || '—' %></b></td><td><%= r.by_name || '—' %></td><td class="small"><%= r.note || '' %></td></tr>
   <% }) %>
   </tbody></table></div>
