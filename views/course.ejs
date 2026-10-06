@@ -1,0 +1,79 @@
+<%- include('partials/head') %>
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Buffalo Jumpstart</div>
+      <h1>Welcome, <%= user.name %></h1>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <section class="stack" aria-label="Course videos">
+      <% if (course.welcome) { %>
+        <a class="lesson welcome" href="/video/<%= course.welcome.id %>">
+          <span class="ico"><%- u.icon(course.welcomeWatched ? 'check' : 'wave') %></span>
+          <span class="grow"><span class="t">Welcome message</span><span class="s"><%= course.welcomeWatched ? 'Watched · rewatch anytime' : 'Start here (optional)' %></span></span>
+          <span class="chev"><%- u.icon('chev') %></span>
+        </a>
+      <% } %>
+
+      <% course.modules.forEach(function (m) { %>
+        <% if (m.state === 'locked') { %>
+          <div class="lesson locked">
+            <span class="ico"><%- u.icon('lock', 16) %></span>
+            <span class="grow"><span class="t">Module <%= m.number %> · <%= m.title %></span>
+              <span class="s"><%= m.number > 1 ? 'Unlocks after Module ' + (m.number - 1) : 'Locked' %></span></span>
+          </div>
+        <% } else { %>
+          <a class="lesson <%= m.state === 'done' ? 'done' : 'current' %>" href="<%= m.state === 'quiz' ? '/quiz/' + m.id : '/video/' + m.id %>">
+            <span class="ico"><%- u.icon(m.state === 'done' ? 'check' : m.state === 'quiz' ? 'quiz' : 'play', m.state === 'play' ? 16 : 18) %></span>
+            <span class="grow"><span class="t">Module <%= m.number %> · <%= m.title %></span>
+              <span class="s">
+                <% if (m.state === 'done') { %><%= m.quizLive ? 'Quiz passed' : 'Completed' %> · rewatch anytime
+                <% } else if (m.state === 'quiz') { %>Video watched · take the quiz
+                <% } else { %>Up next · watch to the end<%= m.quizLive ? ', then take the quiz' : '' %><% } %>
+              </span></span>
+            <span class="chev"><%- u.icon('chev') %></span>
+          </a>
+        <% } %>
+      <% }) %>
+
+      <% if (course.allModulesDone) { %>
+        <a class="lesson <%= course.certificateReady ? 'done' : 'current' %>" href="<%= course.certificateReady || !course.congratsHasVideo ? '/complete' : '/video/' + course.congrats.id %>">
+          <span class="ico"><%- u.icon('award') %></span>
+          <span class="grow"><span class="t">Congratulations &amp; certificate</span>
+            <span class="s"><%= course.certificateReady ? 'Certificate ready · next steps' : 'Watch the congratulations video to unlock your certificate' %></span></span>
+          <span class="chev"><%- u.icon('chev') %></span>
+        </a>
+      <% } else { %>
+        <div class="lesson locked">
+          <span class="ico"><%- u.icon('award') %></span>
+          <span class="grow"><span class="t">Congratulations &amp; certificate</span><span class="s">Unlocks after Module <%= course.modulesTotal %></span></span>
+        </div>
+      <% } %>
+    </section>
+
+    <aside class="stack aside-first">
+      <div class="card card-dark stack">
+        <div class="spread"><span class="muted small">Course progress</span><span class="muted small"><%= course.percent %>%</span></div>
+        <h2 style="font-size:22px"><%= course.modulesDone %> of <%= course.modulesTotal %> modules done</h2>
+        <div class="bar" role="progressbar" aria-valuenow="<%= course.percent %>" aria-valuemin="0" aria-valuemax="100"><span style="width:<%= course.percent %>%"></span></div>
+        <% if (course.certificateReady) { %>
+          <a class="btn btn-gold" href="/complete"><%- u.icon('award') %>Certificate &amp; next steps</a>
+        <% } else if (course.next) { %>
+          <a class="btn btn-gold" href="<%= course.next.state === 'quiz' ? '/quiz/' + course.next.id : '/video/' + course.next.id %>">
+            <%- u.icon(course.next.state === 'quiz' ? 'quiz' : 'play', 16) %><%= course.next.state === 'quiz' ? 'Take Module ' + course.next.number + ' quiz' : 'Continue with Module ' + course.next.number %></a>
+        <% } else if (course.allModulesDone && course.congratsHasVideo) { %>
+          <a class="btn btn-gold" href="/video/<%= course.congrats.id %>"><%- u.icon('play', 16) %>Watch the congratulations video</a>
+        <% } %>
+      </div>
+      <div class="card stack small">
+        <h3>How it works</h3>
+        <p>Watch each module to the end. Skipping and fast-forwarding are fine.</p>
+        <p>Then answer every quiz question correctly to unlock the next module. You can retake a quiz as often as you need.</p>
+        <p>After the last module, download your certificate and register for the next Jumpstart Workshop.</p>
+      </div>
+    </aside>
+  </div>
+</main>
+<%- include('partials/foot') %>

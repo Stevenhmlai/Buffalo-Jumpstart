@@ -1,0 +1,28 @@
+<form method="post" action="<%= f.action %>" class="stack" data-qform>
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="form-grid" style="grid-template-columns:200px minmax(0,1fr)">
+    <div class="field">
+      <label>Type</label>
+      <select name="qtype">
+        <option value="mc" <%= f.q.qtype === 'mc' ? 'selected' : '' %>>Multiple choice</option>
+        <option value="tf" <%= f.q.qtype === 'tf' ? 'selected' : '' %>>True / false</option>
+      </select>
+    </div>
+    <div class="field"><label>Question</label><input name="text" type="text" value="<%= f.q.text %>" required></div>
+  </div>
+  <div data-mc class="stack" style="gap:8px">
+    <span class="label">Answers — select the correct one (leave unused boxes empty)</span>
+    <% for (var j = 0; j < 5; j++) { %>
+      <div class="opt-row">
+        <input type="radio" name="correct" value="<%= j %>" aria-label="Answer <%= String.fromCharCode(65 + j) %> is correct" <%= f.q.qtype === 'mc' && f.q.correct === j ? 'checked' : '' %>>
+        <input type="text" name="o<%= j %>" value="<%= f.mcOpts[j] %>" placeholder="Answer <%= String.fromCharCode(65 + j) %>">
+      </div>
+    <% } %>
+  </div>
+  <div data-tf class="row" hidden>
+    <span class="label">Correct answer:</span>
+    <label class="check"><input type="radio" name="correct" value="0" <%= f.q.qtype === 'tf' && f.q.correct === 0 ? 'checked' : '' %>>True</label>
+    <label class="check"><input type="radio" name="correct" value="1" <%= f.q.qtype === 'tf' && f.q.correct === 1 ? 'checked' : '' %>>False</label>
+  </div>
+  <div><button class="btn btn-sm" type="submit"><%= f.label %></button></div>
+</form>

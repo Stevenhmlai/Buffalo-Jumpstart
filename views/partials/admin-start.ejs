@@ -1,0 +1,12 @@
+<%- include('head') %>
+<main class="wrap">
+  <div class="admin-shell">
+    <nav class="side" aria-label="Admin">
+      <a href="/admin" class="<%= adminNav === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+      <a href="/admin/approvals" class="<%= adminNav === 'approvals' ? 'active' : '' %>">Approvals<% if (adminCounts.pending) { %><span class="count"><%= adminCounts.pending %></span><% } %></a>
+      <a href="/admin/agents" class="<%= adminNav === 'agents' ? 'active' : '' %>">Agents</a>
+      <a href="/admin/videos" class="<%= adminNav === 'videos' ? 'active' : '' %>">Videos &amp; quizzes<% if (adminCounts.drafts) { %><span class="count"><%= adminCounts.drafts %></span><% } %></a>
+      <a href="/admin/batches" class="<%= adminNav === 'batches' ? 'active' : '' %>">Batches</a>
+      <a href="/admin/settings" class="<%= adminNav === 'settings' ? 'active' : '' %>">Settings</a>
+    </nav>
+    <div class="stack" style="gap:20px;min-width:0">

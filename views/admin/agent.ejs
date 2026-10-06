@@ -1,0 +1,96 @@
+<%- include('../partials/admin-start') %>
+<div>
+  <a href="/admin/agents" class="small">← Agents</a>
+  <div class="spread" style="margin-top:6px">
+    <h1><%= a.name %></h1>
+    <span class="pill <%= a.status === 'active' ? 'pill-dark' : 'pill-red' %>"><%= a.statusLabel %></span>
+  </div>
+  <p class="muted" style="margin-top:4px"><%= a.agent_code %> · <%= groupSize %> in their group</p>
+</div>
+
+<div class="grid-2" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
+  <section class="card stack">
+    <h2>Details</h2>
+    <form method="post" action="/admin/agents/<%= a.id %>" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field"><label for="name">Name</label><input id="name" name="name" type="text" value="<%= a.name %>"></div>
+      <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="<%= a.email %>"></div>
+      <div class="field"><label for="mobile">Mobile</label><input id="mobile" name="mobile" type="tel" value="<%= a.mobile || '' %>"></div>
+      <label class="check"><input type="checkbox" name="trainee" value="1" <%= a.trainee ? 'checked' : '' %>>Enrolled in Buffalo Jumpstart</label>
+      <label class="check"><input type="checkbox" name="is_admin" value="1" <%= a.is_admin ? 'checked' : '' %>>Admin</label>
+      <div class="row"><button class="btn" type="submit">Save details</button></div>
+    </form>
+    <dl class="kv small">
+      <dt>Approved</dt><dd><%= u.fmtDateTime(a.approved_at) || '—' %></dd>
+      <dt>Last activity</dt><dd><%= u.fmtDateTime(a.last_activity_at) || '—' %></dd>
+      <dt>Course completed</dt><dd><%= a.course.certificateReady ? u.fmtDate(a.course_completed_at) : '—' %></dd>
+    </dl>
+    <% if (a.status === 'active') { %>
+      <form method="post" action="/admin/agents/<%= a.id %>/send-reset" class="inline" data-confirm="Email <%= a.name %> a link to set a new password?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn" type="submit">Email a set-password link</button>
+      </form>
+    <% } %>
+  </section>
+
+  <div class="stack">
+    <section class="card stack">
+      <h2>Upline</h2>
+      <p>Current: <b><%= a.upline_code || 'None' %></b><%= uplineUser ? ' — ' + uplineUser.name : (a.upline_code ? ' (not in the portal yet)' : '') %></p>
+      <form method="post" action="/admin/agents/<%= a.id %>/upline" class="stack" data-confirm="Change the upline? <%= a.name %>'s whole group will move with them.">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="field"><label for="upline">New upline agent code</label><input id="upline" name="upline" type="text" value="<%= a.upline_code || '' %>"></div>
+        <div class="field"><label for="note">Note (optional)</label><input id="note" name="note" type="text" placeholder="e.g. January restructure"></div>
+        <div><button class="btn btn-dark" type="submit">Change upline</button></div>
+      </form>
+      <p class="tiny muted">Everyone below <%= a.name %> moves with them. Every change is logged.</p>
+    </section>
+
+    <section class="card stack">
+      <h2>Training</h2>
+      <% a.course.modules.forEach(function (m) {
+        var att = attempts.find(function (x) { return x.position === m.position; }); %>
+        <div class="spread small" style="border-bottom:1px solid #F0EAE0;padding:4px 0">
+          <span>Module <%= m.number %></span>
+          <span><% if (m.state === 'done') { %><span class="pill pill-green">Done</span><% } else if (m.state === 'quiz') { %><span class="pill pill-gold">Quiz pending</span><% } else if (m.state === 'current') { %><span class="pill pill-dark">Up next</span><% } else { %><span class="pill pill-grey">Locked</span><% } %>
+          <% if (att) { %><span class="tiny muted"> · <%= att.n %> attempt<%= att.n > 1 ? 's' : '' %></span><% } %></span>
+        </div>
+      <% }) %>
+      <p class="small">Workshop: <%= workshops.length ? workshops.map(function (w) { return 'Batch ' + w.number + ' (' + (w.method === 'qr' ? 'QR' : 'manual') + ')'; }).join(', ') : 'not attended' %></p>
+      <p class="small">Zoom: <%= zooms.length ? zooms.map(function (z) { return 'B' + z.number + ' #' + z.seq; }).join(', ') : 'none' %></p>
+    </section>
+  </div>
+</div>
+
+<% if (changes.length) { %>
+  <section class="card stack">
+    <h2>Upline history</h2>
+    <% changes.forEach(function (c) { %>
+      <p class="small"><%= u.fmtDate(c.changed_at) %>: <%= c.old_upline || 'none' %> → <b><%= c.new_upline || 'none' %></b> by <%= c.by_name || '—' %><%= c.note ? ' · ' + c.note : '' %></p>
+    <% }) %>
+  </section>
+<% } %>
+
+<% if (a.id !== user.id) { %>
+  <section class="card stack">
+    <h2>Account</h2>
+    <% if (a.status === 'active') { %>
+      <p class="small muted">Deactivate when an agent is terminated. They can no longer log in, but their training record is kept.</p>
+      <form method="post" action="/admin/agents/<%= a.id %>/deactivate" class="stack" data-confirm="Deactivate <%= a.name %>?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <% if (direct.length) { %>
+          <div class="field" style="max-width:360px">
+            <label for="move_to">Move their <%= direct.length %> direct downline<%= direct.length > 1 ? 's' : '' %> to (agent code)</label>
+            <input id="move_to" name="move_to" type="text" value="<%= a.upline_code || '' %>">
+            <span class="hint">Their whole groups move with them. Defaults to <%= a.name %>'s upline.</span>
+          </div>
+        <% } %>
+        <div><button class="btn btn-ghost" type="submit">Deactivate account</button></div>
+      </form>
+    <% } else if (a.status === 'inactive') { %>
+      <form method="post" action="/admin/agents/<%= a.id %>/reactivate" class="inline">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-ghost" type="submit">Reactivate account</button>
+      </form>
+    <% } %>
+  </section>
+<% } %>
+<%- include('../partials/admin-end') %>

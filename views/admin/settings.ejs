@@ -1,0 +1,17 @@
+<%- include('../partials/admin-start') %>
+<div><h1>Settings</h1></div>
+<section class="card stack">
+  <h2>"Next steps" text</h2>
+  <p class="small muted">Shown to members with their certificate after they complete the course.</p>
+  <form method="post" action="/admin/settings" class="stack">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label class="sr-only" for="ns">Next steps</label>
+    <textarea id="ns" name="next_steps" rows="10"><%= nextSteps %></textarea>
+    <div><button class="btn" type="submit">Save</button></div>
+  </form>
+</section>
+<section class="card stack small">
+  <h2>Registration link</h2>
+  <p>Share this with new members: <b><%= baseUrl %>/register</b></p>
+</section>
+<%- include('../partials/admin-end') %>

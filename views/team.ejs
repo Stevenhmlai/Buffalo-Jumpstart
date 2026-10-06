@@ -1,0 +1,55 @@
+<%- include('partials/head') %>
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Buffalo Jumpstart</div>
+      <h1>My group</h1>
+      <p>Everyone below you, including your downlines' agents (<%= total %> people).</p>
+    </div>
+  </div>
+  <div class="grid-cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px">
+    <div class="card tight stat"><span class="num"><%= stats.training %></span><span class="lbl">In training</span></div>
+    <div class="card tight stat good"><span class="num"><%= stats.completed %></span><span class="lbl">Completed</span></div>
+    <div class="card tight stat warn"><span class="num"><%= stats.nudge %></span><span class="lbl">Idle 7+ days</span></div>
+  </div>
+  <nav class="row" style="margin-bottom:16px;gap:6px" aria-label="Filter">
+    <% [['all','All'],['nudge','Needs a nudge'],['training','In training'],['completed','Completed']].forEach(function (f) { %>
+      <a class="btn btn-sm <%= filter === f[0] ? 'btn-dark' : 'btn-ghost' %>" href="/team?f=<%= f[0] %>"><%= f[1] %></a>
+    <% }) %>
+  </nav>
+
+  <% if (!rows.length) { %>
+    <div class="card"><p class="muted">Nobody to show here.</p></div>
+  <% } %>
+  <div class="stack" style="gap:10px">
+    <% rows.forEach(function (r) { %>
+      <div class="card tight stack" style="gap:10px">
+        <div class="spread" style="align-items:flex-start">
+          <div>
+            <div style="font-weight:700"><%= r.name %></div>
+            <div class="tiny muted"><%= r.agent_code %> · <%= r.depth === 1 ? 'direct' : 'via ' + (r.upline_name || r.upline_code) %><%= r.batch ? ' · Batch ' + r.batch : '' %></div>
+          </div>
+          <% if (!r.trainee) { %><span class="pill pill-grey">Not enrolled</span>
+          <% } else if (r.course.certificateReady) { %><span class="pill pill-green">Completed</span>
+          <% } else if (r.needsNudge) { %><span class="pill pill-gold"><%= r.notStarted ? 'Not started · ' : 'Idle ' %><%= r.idleDays %> days</span>
+          <% } else if (r.notStarted) { %><span class="pill pill-grey">Not started</span>
+          <% } else { %><span class="pill pill-dark">In progress</span><% } %>
+        </div>
+        <% if (r.trainee) { %>
+          <div class="mini-bar">
+            <div class="bar"><span style="width:<%= r.course.percent %>%"></span></div>
+            <span class="tiny"><%= r.course.modulesDone %>/<%= r.course.modulesTotal %> modules</span>
+          </div>
+          <div class="row tiny muted" style="gap:14px">
+            <span>Workshop: <%= r.batch ? 'attended (Batch ' + r.batch + ')' : 'not yet' %></span>
+            <span>Zoom: <%= r.zoom %>/4</span>
+          </div>
+        <% } %>
+        <% if (r.needsNudge && r.wa) { %>
+          <a class="btn btn-ghost btn-sm" href="https://wa.me/<%= r.wa %>?text=<%= encodeURIComponent(r.waText) %>" target="_blank" rel="noopener"><%- u.icon('whatsapp', 16) %>Nudge on WhatsApp</a>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+</main>
+<%- include('partials/foot') %>

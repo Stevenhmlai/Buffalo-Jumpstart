@@ -1,0 +1,66 @@
+<%- include('../partials/admin-start') %>
+<%
+  function qform(action, q, submitLabel) {
+    q = q || { qtype: 'mc', text: '', options: ['', '', '', ''], correct: 0 };
+    var mcOpts = q.qtype === 'mc' ? q.options.slice() : ['', '', '', ''];
+    while (mcOpts.length < 5) mcOpts.push('');
+    return { action: action, q: q, mcOpts: mcOpts, label: submitLabel };
+  }
+%>
+<div>
+  <a href="/admin/videos" class="small">← Videos &amp; quizzes</a>
+  <h1 style="margin-top:6px">Module <%= moduleNo %> quiz</h1>
+  <p class="muted" style="margin-top:4px"><%= v.title %></p>
+</div>
+
+<div class="card stack">
+  <div class="spread">
+    <div class="row">
+      <% if (v.quiz_status === 'approved') { %><span class="pill pill-green">Live</span><span class="small muted">Approved by <%= v.approver || 'an admin' %> on <%= u.fmtDate(v.quiz_approved_at) %></span>
+      <% } else if (v.quiz_status === 'draft') { %><span class="pill pill-gold">Draft · awaiting approval</span>
+      <% } else { %><span class="pill pill-grey">No questions yet</span><% } %>
+    </div>
+    <div class="row">
+      <% if (v.quiz_status === 'draft') { %>
+        <form method="post" action="/admin/videos/<%= v.id %>/quiz/approve" class="inline" data-confirm="Publish this quiz? Members will need to pass it (100%) to unlock the next module.">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn" type="submit">Approve &amp; publish</button>
+        </form>
+      <% } else if (v.quiz_status === 'approved') { %>
+        <form method="post" action="/admin/videos/<%= v.id %>/quiz/unpublish" class="inline" data-confirm="Move this quiz back to draft?">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-ghost btn-sm" type="submit">Move back to draft</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+  <p class="small muted"><%= questions.length %> question<%= questions.length === 1 ? '' : 's' %> · pass mark 100% · question and answer order is shuffled on every attempt.</p>
+</div>
+
+<% questions.forEach(function (qq, i) { %>
+  <div class="card stack" id="q<%= qq.id %>">
+    <div class="spread">
+      <div class="q-num">Q<%= i + 1 %> · <%= qq.qtype === 'tf' ? 'True / false' : 'Multiple choice' %></div>
+      <div class="row" style="gap:6px">
+        <a class="btn btn-sm btn-ghost" href="?edit=<%= qq.id %>#q<%= qq.id %>">Edit</a>
+        <form method="post" action="/admin/questions/<%= qq.id %>/delete" class="inline" data-confirm="Delete this question?">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit">Delete</button>
+        </form>
+      </div>
+    </div>
+    <% if (edit === qq.id) { var f = qform('/admin/questions/' + qq.id, qq, 'Save question'); %>
+      <%- include('quiz-form', { f: f }) %>
+    <% } else { %>
+      <div style="font-weight:600;font-size:16px"><%= qq.text %></div>
+      <div class="opts-grid">
+        <% qq.options.forEach(function (o, j) { %>
+          <div class="answer <%= j === qq.correct ? 'correct' : '' %>"><%= String.fromCharCode(65 + j) %> · <%= o %><%= j === qq.correct ? ' ✓' : '' %></div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+<% }) %>
+
+<div class="card stack" id="add">
+  <h2>Add a question</h2>
+  <%- include('quiz-form', { f: qform('/admin/videos/' + v.id + '/questions', null, 'Add question') }) %>
+</div>
+<%- include('../partials/admin-end') %>

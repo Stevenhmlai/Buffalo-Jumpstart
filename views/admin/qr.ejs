@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %> · Buffalo Jumpstart</title>
+<link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+<main class="qr-screen">
+  <img src="/static/img/logo-400.png" alt="Buffalo Investment" style="width:110px">
+  <div>
+    <div class="eyebrow">Buffalo Jumpstart · Batch <%= b.number %> Workshop</div>
+    <h1 style="font-size:40px;margin-top:6px">Scan to check in</h1>
+    <p class="muted" style="font-size:18px;margin-top:6px">Open your phone camera, scan, and log in if asked.</p>
+  </div>
+  <img class="qr" src="<%= qr %>" alt="Check-in QR code">
+  <% if (!open) { %><div class="alert alert-warn">Check-in is not open right now. It opens 1 hour before the workshop starts.</div><% } %>
+  <p style="font-size:20px"><b data-count-url="/admin/batches/<%= b.id %>/count"><%= count %></b> checked in</p>
+</main>
+<script src="/static/js/app.js"></script>
+</body>
+</html>

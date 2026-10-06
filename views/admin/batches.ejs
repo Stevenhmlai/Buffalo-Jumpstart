@@ -1,0 +1,35 @@
+<%- include('../partials/admin-start') %>
+<div><h1>Batches</h1><p class="muted" style="margin-top:4px">Each batch has one physical workshop and 4 Zoom sessions. A member's batch is the workshop they attend.</p></div>
+
+<details class="box" <%= batches.length ? '' : 'open' %>>
+  <summary>Create a new batch <span class="small muted">+</span></summary>
+  <div class="inner">
+    <form method="post" action="/admin/batches" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="form-grid">
+        <div class="field"><label for="number">Batch number</label><input id="number" name="number" type="number" min="1" value="<%= suggested %>" required><span class="hint">Continue from your past Jumpstart batches.</span></div>
+        <div class="field"><label for="venue">Venue</label><input id="venue" name="venue" type="text" required></div>
+        <div class="field"><label for="start">Workshop starts</label><input id="start" name="start" type="datetime-local" required></div>
+        <div class="field"><label for="end">Workshop ends</label><input id="end" name="end" type="datetime-local" required></div>
+      </div>
+      <p class="tiny muted">Times are Malaysia time. You'll add the 4 Zoom sessions on the next page.</p>
+      <div><button class="btn" type="submit">Create batch</button></div>
+    </form>
+  </div>
+</details>
+
+<div class="table-wrap"><table class="t">
+  <thead><tr><th>Batch</th><th>Workshop</th><th>Venue</th><th>Registered</th><th>Attended</th><th></th></tr></thead>
+  <tbody>
+  <% if (!batches.length) { %><tr><td colspan="6" class="muted">No batches yet.</td></tr><% } %>
+  <% batches.forEach(function (b) { var upcoming = new Date(b.workshop_end) > new Date(); %>
+    <tr>
+      <td><a class="name" href="/admin/batches/<%= b.id %>">Batch <%= b.number %></a></td>
+      <td class="small"><%= u.fmtDateTime(b.workshop_start) %><% if (upcoming) { %> <span class="pill pill-gold">Upcoming</span><% } %></td>
+      <td class="small"><%= b.venue %></td>
+      <td><%= b.regs %></td><td><%= b.attended %></td>
+      <td><a class="btn btn-sm btn-ghost" href="/admin/batches/<%= b.id %>">Open</a></td>
+    </tr>
+  <% }) %>
+  </tbody></table></div>
+<%- include('../partials/admin-end') %>

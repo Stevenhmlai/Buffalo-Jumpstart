@@ -1,0 +1,58 @@
+<%- include('../partials/admin-start') %>
+<div class="page-head" style="margin:0">
+  <div><h1>Dashboard</h1><p>Buffalo Jumpstart · all enrolled members</p></div>
+  <a class="btn btn-ghost" href="/admin/export/agents.xlsx"><%- u.icon('download', 16) %>Export agents to Excel</a>
+</div>
+
+<% if (adminCounts.pending) { %>
+  <a class="alert alert-warn" href="/admin/approvals" style="text-decoration:none;display:block"><b><%= adminCounts.pending %> registration<%= adminCounts.pending > 1 ? 's' : '' %></b> waiting for approval →</a>
+<% } %>
+
+<div class="grid-cards">
+  <div class="card stat"><span class="lbl">In training</span><span class="num"><%= inTraining %></span></div>
+  <div class="card stat good"><span class="lbl">Completed this month</span><span class="num"><%= completedThisMonth %></span></div>
+  <div class="card stat"><span class="lbl">Avg. days to complete</span><span class="num"><%= avgDays === null ? '—' : avgDays %></span></div>
+  <a class="card stat warn" href="/admin/agents?s=idle" style="text-decoration:none;color:inherit"><span class="lbl">Idle 7+ days</span><span class="num"><%= idle %></span></a>
+</div>
+
+<div class="grid-2" style="grid-template-columns:minmax(0,3fr) minmax(0,2fr)">
+  <section class="card stack">
+    <div class="spread"><h2>Where members are</h2><span class="tiny muted">members in training, by current step</span></div>
+    <div class="hbar">
+      <span class="muted">Not started</span>
+      <div class="track"><div class="fill alt" style="width:<%= Math.round(dist.notStarted / maxBar * 100) %>%"></div></div>
+      <b style="text-align:right"><%= dist.notStarted %></b>
+      <% modules.forEach(function (m, i) { %>
+        <span class="muted">Module <%= i + 1 %></span>
+        <div class="track"><div class="fill" style="width:<%= Math.round(dist.perModule[i] / maxBar * 100) %>%"></div></div>
+        <b style="text-align:right"><%= dist.perModule[i] %></b>
+      <% }) %>
+    </div>
+    <p class="tiny muted"><%= completed %> member<%= completed === 1 ? '' : 's' %> have completed the course in total.</p>
+  </section>
+  <div class="stack">
+    <section class="card stack">
+      <h2>Hardest quizzes</h2>
+      <p class="tiny muted">Average attempts needed to pass</p>
+      <% if (!hardest.length) { %><p class="small muted">No quiz results yet.</p><% } %>
+      <% hardest.forEach(function (h) { %>
+        <div class="spread small" style="border-bottom:1px solid var(--line);padding:6px 0"><span>Module <%= h.position %> quiz <span class="muted">(<%= h.passers %> passed)</span></span><b><%= h.avg_attempts %></b></div>
+      <% }) %>
+    </section>
+    <section class="card stack">
+      <h2>Next workshop</h2>
+      <% if (nextBatch) { %>
+        <p><b>Batch <%= nextBatch.number %></b> · <%= u.fmtDateTime(nextBatch.workshop_start) %></p>
+        <p class="small muted"><%= nextBatch.venue %> · <%= nextBatch.regs %> registered</p>
+        <a class="btn btn-ghost btn-sm" href="/admin/batches/<%= nextBatch.id %>">Open batch</a>
+      <% } else { %>
+        <p class="small muted">No upcoming workshop. <a href="/admin/batches">Create a batch</a></p>
+      <% } %>
+    </section>
+    <section class="card stack small">
+      <h2>Reminders</h2>
+      <p class="muted">Every day at 9am, emails go to members with no progress for 7 days, and to members with a workshop or Zoom session the next day.</p>
+    </section>
+  </div>
+</div>
+<%- include('../partials/admin-end') %>

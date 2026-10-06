@@ -1,0 +1,26 @@
+<%- include('partials/head') %>
+<main class="wrap-narrow">
+  <h1 style="margin-bottom:16px">My account</h1>
+  <div class="card stack" style="margin-bottom:16px">
+    <dl class="kv">
+      <dt>Name</dt><dd><%= user.name %></dd>
+      <dt>Agent code</dt><dd><%= user.agent_code %></dd>
+      <dt>Email</dt><dd><%= user.email %></dd>
+      <dt>Mobile</dt><dd><%= user.mobile || '—' %></dd>
+      <dt>Upline code</dt><dd><%= user.upline_code || '—' %></dd>
+    </dl>
+    <p class="tiny muted">To change these details, please ask an admin.</p>
+  </div>
+  <div class="card stack">
+    <h2>Change password</h2>
+    <% if (error) { %><div class="alert alert-err" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/account/password" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field"><label for="current">Current password</label><input id="current" name="current" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="field"><label for="password2">Confirm new password</label><input id="password2" name="password2" type="password" autocomplete="new-password" required></div>
+      <button class="btn" type="submit">Change password</button>
+    </form>
+  </div>
+</main>
+<%- include('partials/foot') %>

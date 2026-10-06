@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<main class="wrap" style="max-width:760px">
+  <a href="/video/<%= video.id %>" class="row small" style="text-decoration:none;font-weight:600;margin-bottom:12px;min-height:44px"><%- u.icon('back') %>Back to the video</a>
+  <div class="stack">
+    <div>
+      <div class="eyebrow">Module <%= mod.number %> quiz</div>
+      <h1 style="margin-top:4px"><%= video.title %></h1>
+      <p class="muted" style="margin-top:6px"><%= items.length %> questions · get every answer right to <%= mod.number < course.modulesTotal ? 'unlock Module ' + (mod.number + 1) : 'finish the course' %>.<%= attempts ? ' Attempt ' + (attempts + 1) + '.' : '' %></p>
+    </div>
+    <% if (alreadyPassed) { %><div class="alert alert-ok">You've already passed this quiz. You can take it again for practice.</div><% } %>
+    <form method="post" class="stack">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <% items.forEach(function (it, i) { %>
+        <fieldset class="card q-card">
+          <legend class="sr-only">Question <%= i + 1 %></legend>
+          <div class="q-num">Question <%= i + 1 %> of <%= items.length %> · <%= it.qtype === 'tf' ? 'True or false' : 'Multiple choice' %></div>
+          <div class="q-text"><%= it.text %></div>
+          <% it.options.forEach(function (o, j) { %>
+            <label class="opt"><input type="radio" name="a<%= i %>" value="<%= j %>" required><span><%= o %></span></label>
+          <% }) %>
+        </fieldset>
+      <% }) %>
+      <button class="btn btn-block" type="submit">Submit answers</button>
+    </form>
+  </div>
+</main>
+<%- include('partials/foot') %>

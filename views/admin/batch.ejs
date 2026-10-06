@@ -1,0 +1,123 @@
+<%- include('../partials/admin-start') %>
+<div class="page-head" style="margin:0">
+  <div>
+    <a href="/admin/batches" class="small">← Batches</a>
+    <h1 style="margin-top:6px">Batch <%= b.number %></h1>
+    <p><%= u.fmtDateTime(b.workshop_start) %> – <%= u.fmtTime(b.workshop_end) %> · <%= b.venue %></p>
+  </div>
+  <div class="row">
+    <a class="btn btn-ghost btn-sm" href="/admin/batches/<%= b.id %>/export.xlsx"><%- u.icon('download', 16) %>Download batch (Excel)</a>
+  </div>
+</div>
+
+<div class="grid-cards">
+  <div class="card stat"><span class="lbl">Registered</span><span class="num"><%= attendees.length + registeredAbsent.length %></span></div>
+  <div class="card stat good"><span class="lbl">Attended workshop</span><span class="num"><%= attendees.length %></span></div>
+  <div class="card stat <%= workshopOver && registeredAbsent.length ? 'warn' : '' %>"><span class="lbl"><%= workshopOver ? 'Registered, absent' : 'Not checked in yet' %></span><span class="num"><%= registeredAbsent.length %></span></div>
+  <div class="card stat"><span class="lbl">Batch <%= b.number %> members</span><span class="num"><%= members.length %></span></div>
+</div>
+
+<section class="card stack" id="workshop">
+  <div class="spread">
+    <h2>Workshop check-in</h2>
+    <% if (checkinOpen) { %><span class="pill pill-green">Check-in open now</span><% } else { %><span class="pill pill-grey">Opens 1 hour before the start</span><% } %>
+  </div>
+  <p class="small muted">Open the QR screen on the projector. Members scan it with their phone while logged in. The QR only works from 1 hour before the workshop until 1 hour after it ends.</p>
+  <div class="row">
+    <a class="btn btn-dark" href="/admin/batches/<%= b.id %>/qr" target="_blank" rel="noopener"><%- u.icon('qr') %>Open QR screen</a>
+  </div>
+  <form method="post" action="/admin/batches/<%= b.id %>/mark" class="row" style="align-items:flex-end">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="field" style="min-width:220px"><label for="mark">Mark present by agent code</label><input id="mark" name="code" type="text" placeholder="e.g. BIA2031" required></div>
+    <button class="btn btn-ghost" type="submit">Mark present</button>
+  </form>
+
+  <div class="grid-2" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px">
+    <div class="stack" style="gap:8px">
+      <h3>Attended (<%= attendees.length %>)</h3>
+      <% if (!attendees.length) { %><p class="small muted">No check-ins yet.</p><% } %>
+      <% attendees.forEach(function (p) { %>
+        <div class="spread small" style="border-bottom:1px solid #F0EAE0;padding:4px 0">
+          <span><a href="/admin/agents/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.method === 'qr' ? 'QR' : 'manual' %></span></span>
+          <form method="post" action="/admin/batches/<%= b.id %>/unmark/<%= p.id %>" class="inline" data-confirm="Remove <%= p.name %>'s workshop attendance?">
+            <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn tiny" type="submit">Remove</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+    <div class="stack" style="gap:8px">
+      <h3><%= workshopOver ? 'Registered but absent' : 'Registered, not checked in' %> (<%= registeredAbsent.length %>)</h3>
+      <% if (!registeredAbsent.length) { %><p class="small muted">Nobody.</p><% } %>
+      <% registeredAbsent.forEach(function (p) { %>
+        <div class="small" style="border-bottom:1px solid #F0EAE0;padding:4px 0"><a href="/admin/agents/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.mobile || '' %></span></div>
+      <% }) %>
+    </div>
+  </div>
+  <% if (attendees.length > members.length) { %>
+    <p class="tiny muted"><%= attendees.length - members.length %> attendee(s) had already attended an earlier workshop, so they stay in their earlier batch.</p>
+  <% } %>
+</section>
+
+<h2>Zoom sessions</h2>
+<p class="small muted" style="margin-top:-12px">Only Batch <%= b.number %> members see these links. Show the 4-digit code near the end of each session; it works from 15 minutes before the start until 30 minutes after the planned end.</p>
+<% zs.forEach(function (z) { var zi = zoomInfo[z.id]; var present = zoomAtt[z.id]; %>
+  <details class="box" id="zoom<%= z.seq %>" <%= zi.open ? 'open' : '' %>>
+    <summary>
+      <span>Zoom session <%= z.seq %> <span class="small muted" style="font-weight:400">· <%= z.starts_at ? u.fmtDateTime(z.starts_at) : 'date not set' %></span></span>
+      <span class="row" style="gap:6px">
+        <% if (zi.open) { %><span class="pill pill-gold">Live now</span><% } %>
+        <span class="pill pill-grey"><%= present.size %>/<%= members.length %> attended</span>
+      </span>
+    </summary>
+    <div class="inner stack">
+      <div class="row" style="gap:20px;align-items:center">
+        <div><span class="label">Attendance code</span><div class="code-big"><%= z.code %></div></div>
+        <form method="post" action="/admin/zoom/<%= z.id %>/new-code" class="inline" data-confirm="Generate a new code? The old one will stop working.">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-ghost" type="submit">New code</button>
+        </form>
+      </div>
+      <form method="post" action="/admin/zoom/<%= z.id %>" class="form-grid" style="align-items:end">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="field"><label for="zs<%= z.id %>">Starts (Malaysia time)</label><input id="zs<%= z.id %>" name="starts_at" type="datetime-local" value="<%= u.toLocalInput(z.starts_at) %>"></div>
+        <div class="field"><label for="zd<%= z.id %>">Length (minutes)</label><input id="zd<%= z.id %>" name="duration_min" type="number" min="15" max="480" value="<%= z.duration_min %>"></div>
+        <div class="field" style="grid-column:1/-1"><label for="zl<%= z.id %>">Zoom link</label><input id="zl<%= z.id %>" name="link" type="url" value="<%= z.link || '' %>" placeholder="https://zoom.us/j/..."></div>
+        <div><button class="btn btn-sm" type="submit">Save session <%= z.seq %></button></div>
+      </form>
+      <form method="post" action="/admin/zoom/<%= z.id %>/mark" class="row" style="align-items:flex-end">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="field" style="min-width:220px"><label for="zm<%= z.id %>">Mark present by agent code</label><input id="zm<%= z.id %>" name="code" type="text" required></div>
+        <button class="btn btn-ghost btn-sm" type="submit">Mark present</button>
+      </form>
+      <div class="table-wrap"><table class="t">
+        <thead><tr><th>Member</th><th>Session <%= z.seq %></th><th></th></tr></thead>
+        <tbody>
+        <% if (!members.length) { %><tr><td colspan="3" class="muted">No batch members yet (members join a batch by attending its workshop).</td></tr><% } %>
+        <% members.forEach(function (p) { var here = present.has(p.id); %>
+          <tr><td><%= p.name %> <span class="sub"><%= p.agent_code %></span></td>
+            <td><% if (here) { %><span class="pill pill-green">Present</span><% } else if (zi.over) { %><span class="pill pill-red">Absent</span><% } else { %><span class="pill pill-grey">—</span><% } %></td>
+            <td><% if (here) { %><form method="post" action="/admin/zoom/<%= z.id %>/unmark/<%= p.id %>" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn tiny" type="submit">Remove</button></form><% } %></td></tr>
+        <% }) %>
+        </tbody></table></div>
+    </div>
+  </details>
+<% }) %>
+
+<details class="box">
+  <summary>Edit workshop details</summary>
+  <div class="inner stack">
+    <form method="post" action="/admin/batches/<%= b.id %>" class="form-grid" style="align-items:end">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field"><label for="bn">Batch number</label><input id="bn" name="number" type="number" value="<%= b.number %>"></div>
+      <div class="field"><label for="bv">Venue</label><input id="bv" name="venue" type="text" value="<%= b.venue %>"></div>
+      <div class="field"><label for="bs">Starts</label><input id="bs" name="start" type="datetime-local" value="<%= u.toLocalInput(b.workshop_start) %>"></div>
+      <div class="field"><label for="be">Ends</label><input id="be" name="end" type="datetime-local" value="<%= u.toLocalInput(b.workshop_end) %>"></div>
+      <div><button class="btn btn-sm" type="submit">Save</button></div>
+    </form>
+    <% if (!attendees.length) { %>
+      <form method="post" action="/admin/batches/<%= b.id %>/delete" class="inline" data-confirm="Delete Batch <%= b.number %>? Registrations for it will be removed.">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn" type="submit">Delete this batch</button>
+      </form>
+    <% } %>
+  </div>
+</details>
+<%- include('../partials/admin-end') %>

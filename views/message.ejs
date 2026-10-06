@@ -1,0 +1,13 @@
+<%- include('partials/head') %>
+<main class="wrap-narrow">
+  <div class="card stack" style="text-align:center;padding:32px 24px">
+    <h1><%= title %></h1>
+    <p class="muted"><%= message %></p>
+    <% if (typeof link !== 'undefined' && link) { %>
+      <div><a class="btn" href="<%= link.href %>"><%= link.label %></a></div>
+    <% } else { %>
+      <div><a class="btn btn-ghost" href="/">Go to home</a></div>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

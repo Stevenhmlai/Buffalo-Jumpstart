@@ -1,0 +1,91 @@
+<%- include('partials/head') %>
+<main class="wrap" style="max-width:860px">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Buffalo Jumpstart</div>
+      <h1>Workshop &amp; Zoom</h1>
+      <p>One physical workshop, then 4 Zoom sessions with your batch.</p>
+    </div>
+  </div>
+
+  <div class="stack">
+    <% if (myBatch) { %>
+      <div class="card card-dark stack">
+        <div class="eyebrow" style="color:var(--gold)">Your batch</div>
+        <h2 style="font-size:26px">Batch <%= myBatch.number %></h2>
+        <p class="muted small">Workshop attended on <%= u.fmtDate(myBatch.workshop_start) %> · <%= myBatch.venue %></p>
+      </div>
+
+      <h2 style="margin-top:8px">Zoom sessions</h2>
+      <% sessions.forEach(function (z) { %>
+        <div class="card stack" id="zoom<%= z.seq %>">
+          <div class="spread">
+            <h3>Zoom session <%= z.seq %></h3>
+            <% if (z.attended) { %><span class="pill pill-green">Attended</span>
+            <% } else if (z.over) { %><span class="pill pill-red">Absent</span>
+            <% } else if (z.open) { %><span class="pill pill-gold">Happening now</span>
+            <% } else { %><span class="pill pill-grey">Upcoming</span><% } %>
+          </div>
+          <p class="row small"><%- u.icon('calendar', 16) %><%= z.starts_at ? u.fmtDateTime(z.starts_at) : 'Date to be announced' %></p>
+          <% if (!z.attended && !z.over) { %>
+            <% if (z.link) { %>
+              <a class="btn btn-ghost" href="<%= z.link %>" target="_blank" rel="noopener"><%- u.icon('video') %>Join Zoom</a>
+            <% } else { %>
+              <p class="small muted">The Zoom link will appear here before the session.</p>
+            <% } %>
+            <% if (z.open) { %>
+              <form method="post" action="/workshop/zoom/<%= z.id %>" class="stack" style="gap:8px">
+                <input type="hidden" name="_csrf" value="<%= csrf %>">
+                <label for="code<%= z.id %>" class="label">Attendance code (shown during the session)</label>
+                <div class="row" style="flex-wrap:nowrap">
+                  <input id="code<%= z.id %>" name="code" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" style="max-width:140px;font-size:22px;letter-spacing:.3em;text-align:center" required>
+                  <button class="btn" type="submit">Record attendance</button>
+                </div>
+              </form>
+            <% } else { %>
+              <p class="small muted">During the session you'll be shown a 4-digit code. Enter it here to record your attendance.</p>
+            <% } %>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } else if (!course.allModulesDone) { %>
+      <div class="card stack">
+        <h2>Finish the course first</h2>
+        <p>After you complete all <%= course.modulesTotal %> modules, you can register for the next Jumpstart Workshop here.</p>
+        <p class="small muted">You've done <%= course.modulesDone %> of <%= course.modulesTotal %> modules.</p>
+        <a class="btn" href="/course">Continue my course</a>
+      </div>
+    <% } else { %>
+      <% if (missed.length) { %>
+        <div class="alert alert-warn">You were registered for the Batch <%= missed[0].number %> workshop but weren't checked in. Please register for an upcoming one.</div>
+      <% } %>
+      <h2>Upcoming workshops</h2>
+      <% if (!upcoming.length) { %>
+        <div class="card"><p class="muted">No workshop dates are open yet. Please check back soon.</p></div>
+      <% } %>
+      <% upcoming.forEach(function (b) { %>
+        <div class="card stack" style="<%= b.registered ? 'border:2px solid var(--red)' : '' %>">
+          <div class="spread">
+            <h3>Batch <%= b.number %> workshop</h3>
+            <% if (b.registered) { %><span class="pill pill-green">You're registered</span><% } %>
+          </div>
+          <p class="row small"><%- u.icon('calendar', 16) %><%= u.fmtDateTime(b.workshop_start) %> – <%= u.fmtTime(b.workshop_end) %></p>
+          <p class="row small"><%- u.icon('pin', 16) %><%= b.venue %></p>
+          <% if (b.registered) { %>
+            <p class="small muted">At the workshop, scan the QR code on screen with your phone while logged in to record your attendance.</p>
+            <form method="post" action="/workshop/unregister" class="inline" data-confirm="Cancel your registration for this workshop?">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="batch_id" value="<%= b.id %>">
+              <button class="linkbtn" type="submit">Cancel registration</button>
+            </form>
+          <% } else { %>
+            <form method="post" action="/workshop/register">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="batch_id" value="<%= b.id %>">
+              <button class="btn" type="submit">Register for this workshop</button>
+            </form>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

@@ -1,0 +1,52 @@
+<%- include('partials/head') %>
+<main class="wrap">
+  <div class="page-head">
+    <div>
+      <div class="eyebrow">Buffalo Jumpstart</div>
+      <h1>Congratulations, <%= user.name %>!</h1>
+      <p>You've completed all <%= course.modulesTotal %> modules.</p>
+    </div>
+  </div>
+  <div class="grid-2">
+    <section class="stack">
+      <% if (course.congratsHasVideo) { %>
+        <a class="lesson <%= course.congratsWatched ? 'done' : 'current' %>" href="/video/<%= course.congrats.id %>">
+          <span class="ico"><%- u.icon(course.congratsWatched ? 'check' : 'play', 16) %></span>
+          <span class="grow"><span class="t"><%= course.congrats.title %></span>
+          <span class="s"><%= course.congratsWatched ? 'Watched · rewatch anytime' : 'Watch to the end to unlock your certificate' %></span></span>
+          <span class="chev"><%- u.icon('chev') %></span>
+        </a>
+      <% } %>
+      <div class="card stack">
+        <h2>Next steps</h2>
+        <p style="white-space:pre-line"><%= nextSteps %></p>
+      </div>
+      <div class="card stack">
+        <h2>Jumpstart Workshop</h2>
+        <% if (myBatch) { %>
+          <p>You attended the workshop and are in <b>Batch <%= myBatch.number %></b>.</p>
+          <a class="btn btn-ghost" href="/workshop">See your Zoom sessions</a>
+        <% } else if (reg) { %>
+          <p>You're registered for the <b>Batch <%= reg.number %></b> workshop on <b><%= u.fmtDateTime(reg.workshop_start) %></b> at <%= reg.venue %>.</p>
+          <a class="btn btn-ghost" href="/workshop">View or change</a>
+        <% } else { %>
+          <p>Register for the next physical Jumpstart Workshop. Your batch is set by the workshop you attend.</p>
+          <a class="btn" href="/workshop"><%- u.icon('calendar') %>Register for a workshop</a>
+        <% } %>
+      </div>
+    </section>
+    <aside class="stack">
+      <div class="card card-dark stack" style="text-align:center">
+        <div style="color:var(--gold)"><%- u.icon('award', 40) %></div>
+        <h2>Your certificate</h2>
+        <% if (course.certificateReady) { %>
+          <p class="muted small">Certificate of completion, dated <%= u.fmtDateLong(user.course_completed_at) %>.</p>
+          <a class="btn btn-gold" href="/certificate.pdf"><%- u.icon('download') %>Download PDF</a>
+        <% } else { %>
+          <p class="muted small">Watch the congratulations video to the end to unlock your certificate.</p>
+        <% } %>
+      </div>
+    </aside>
+  </div>
+</main>
+<%- include('partials/foot') %>

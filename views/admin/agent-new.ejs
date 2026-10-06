@@ -1,0 +1,20 @@
+<%- include('../partials/admin-start') %>
+<div><a href="/admin/agents" class="small">← Agents</a><h1 style="margin-top:6px">Add agent</h1>
+<p class="muted" style="margin-top:4px">Use this for uplines who need access to see their group, or anyone you want to set up directly. They'll get an email to set their own password.</p></div>
+<div class="card stack" style="max-width:720px">
+  <% if (errors.length) { %><div class="alert alert-err"><ul><% errors.forEach(function(e){ %><li><%= e %></li><% }) %></ul></div><% } %>
+  <form method="post" action="/admin/agents" class="stack">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="form-grid">
+      <div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" value="<%= form.name || '' %>" required></div>
+      <div class="field"><label for="code">Agent code</label><input id="code" name="code" type="text" value="<%= form.code || '' %>" required></div>
+      <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="<%= form.email || '' %>" required></div>
+      <div class="field"><label for="mobile">Mobile</label><input id="mobile" name="mobile" type="tel" value="<%= form.mobile || '' %>"></div>
+      <div class="field"><label for="upline">Upline agent code</label><input id="upline" name="upline" type="text" value="<%= form.upline || '' %>"><span class="hint">Leave blank if they have no upline in the portal.</span></div>
+    </div>
+    <label class="check"><input type="checkbox" name="trainee" value="1" <%= form.trainee ? 'checked' : '' %>>Enrolled in Buffalo Jumpstart (will do the videos)</label>
+    <label class="check"><input type="checkbox" name="is_admin" value="1" <%= form.is_admin ? 'checked' : '' %>>Make this person an admin</label>
+    <div><button class="btn" type="submit">Add and email password link</button></div>
+  </form>
+</div>
+<%- include('../partials/admin-end') %>

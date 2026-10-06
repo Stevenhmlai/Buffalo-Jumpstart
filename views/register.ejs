@@ -1,0 +1,48 @@
+<%- include('partials/head') %>
+<main class="wrap-narrow">
+  <img class="auth-logo" src="/static/img/logo-400.png" alt="Buffalo Investment" style="width:110px">
+  <h1 class="auth-title">Register for Buffalo Jumpstart</h1>
+  <p class="auth-sub">An admin will approve your registration, then you can log in.</p>
+  <div class="card stack">
+    <% if (errors.length) { %>
+      <div class="alert alert-err" role="alert">Please fix the following:<ul><% errors.forEach(function(e){ %><li><%= e %></li><% }) %></ul></div>
+    <% } %>
+    <form method="post" action="/register" class="stack" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" autocomplete="name" value="<%= form.name || '' %>" required>
+      </div>
+      <div class="field">
+        <label for="code">Your agent code</label>
+        <input id="code" name="code" type="text" autocapitalize="characters" value="<%= form.code || '' %>" required>
+        <span class="hint">You'll use this to log in.</span>
+      </div>
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" value="<%= form.email || '' %>" required>
+      </div>
+      <div class="field">
+        <label for="mobile">Mobile (WhatsApp)</label>
+        <input id="mobile" name="mobile" type="tel" autocomplete="tel" placeholder="012-345 6789" value="<%= form.mobile || '' %>" required>
+      </div>
+      <div class="field">
+        <label for="upline">Your upline's agent code</label>
+        <input id="upline" name="upline" type="text" autocapitalize="characters" value="<%= form.upline || '' %>" data-upline-input required>
+        <span class="upline-check" data-upline-result aria-live="polite"></span>
+      </div>
+      <div class="field">
+        <label for="password">Choose a password</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required>
+        <span class="hint">At least 8 characters.</span>
+      </div>
+      <div class="field">
+        <label for="password2">Confirm password</label>
+        <input id="password2" name="password2" type="password" autocomplete="new-password" required>
+      </div>
+      <button class="btn btn-block" type="submit">Submit registration</button>
+    </form>
+    <p class="small" style="text-align:center">Already approved? <a href="/login">Log in</a></p>
+  </div>
+</main>
+<%- include('partials/foot') %>

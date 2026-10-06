@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+<main class="wrap-narrow">
+  <h1 class="auth-title" style="margin-top:12px">Forgot password</h1>
+  <p class="auth-sub">We'll email you a link to set a new password.</p>
+  <div class="card stack">
+    <% if (sent) { %>
+      <div class="alert alert-ok">If that agent code has an active account, a reset link has been sent to its email. Check your inbox (and spam folder).</div>
+      <a class="btn btn-ghost" href="/login">Back to log in</a>
+    <% } else { %>
+      <form method="post" action="/forgot" class="stack">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="field">
+          <label for="code">Agent code</label>
+          <input id="code" name="code" type="text" autocapitalize="characters" required>
+        </div>
+        <button class="btn btn-block" type="submit">Email me a reset link</button>
+      </form>
+      <a class="small" href="/login">Back to log in</a>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>

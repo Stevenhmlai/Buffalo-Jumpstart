@@ -1,0 +1,28 @@
+<%- include('partials/head') %>
+<% var pct = total ? Math.round(score / total * 100) : 0; %>
+<main class="wrap-narrow">
+  <div class="card stack" style="text-align:center;padding:32px 24px">
+    <div class="score-ring" style="background:conic-gradient(<%= passed ? 'var(--green)' : 'var(--gold)' %> 0 <%= pct %>%, #E6DED0 <%= pct %>% 100%)">
+      <div><span class="big"><%= score %>/<%= total %></span><span class="tiny muted">correct</span></div>
+    </div>
+    <% if (passed) { %>
+      <h1>Module <%= mod.number %> passed</h1>
+      <p class="muted"><%= nextMod ? 'Module ' + nextMod.number + ' is now unlocked.' : 'You have finished all the modules. Well done!' %></p>
+      <% if (nextMod) { %>
+        <a class="btn btn-block" href="/video/<%= nextMod.id %>"><%- u.icon('play', 16) %>Start Module <%= nextMod.number %></a>
+      <% } else if (course.congratsHasVideo && !course.congratsWatched) { %>
+        <a class="btn btn-block" href="/video/<%= course.congrats.id %>"><%- u.icon('play', 16) %>Watch the congratulations video</a>
+      <% } else { %>
+        <a class="btn btn-block" href="/complete"><%- u.icon('award') %>Get my certificate</a>
+      <% } %>
+      <a class="btn btn-ghost btn-block" href="/course">Back to my course</a>
+    <% } else { %>
+      <h1>So close</h1>
+      <p class="muted">You need all <%= total %> answers right to <%= mod.number < course.modulesTotal ? 'unlock Module ' + (mod.number + 1) : 'finish the course' %>. Your next attempt will have the questions in a new order.</p>
+      <p class="tiny muted">Attempt <%= attempts %> · <%= u.fmtDateTime(new Date()) %></p>
+      <a class="btn btn-block" href="/quiz/<%= video.id %>">Retake quiz</a>
+      <a class="btn btn-ghost btn-block" href="/video/<%= video.id %>">Rewatch Module <%= mod.number %></a>
+    <% } %>
+  </div>
+</main>
+<%- include('partials/foot') %>
