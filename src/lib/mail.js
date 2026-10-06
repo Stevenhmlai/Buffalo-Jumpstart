@@ -147,6 +147,18 @@ function button(url, label) {
   return `<p style="margin:24px 0"><a href="${url}" style="background:#a3121b;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:bold;display:inline-block">${esc(label)}</a></p>`;
 }
 
+// Plain-text version of an email body (Outlook/Hotmail trust HTML-only mail less)
+function toText(html) {
+  return String(html)
+    .replace(/<a [^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (m, url, label) => `${label.replace(/<[^>]+>/g, '').trim()}: ${url}`)
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|h\d|li)>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/[ \t]+/g, ' ').replace(/\n[ \t]+/g, '\n').replace(/\n{3,}/g, '\n\n').trim()
+    + '\n\nBuffalo Investment Agency';
+}
+
 async function recordError(text) {
   try { await db().setSetting('mail_last_error', text ? `${new Date().toISOString()} ${text}` : ''); } catch (e) { /* ignore */ }
 }
@@ -158,7 +170,7 @@ async function send(to, subject, html) {
     const token = apiConfigured() ? await accessToken() : null;
     const fromAddr = token ? ((await db().getSetting('gmail_email')) || GMAIL_USER) : GMAIL_USER;
     const replyTo = process.env.MAIL_REPLY_TO || undefined;
-    const message = { from: `"${FROM_NAME}" <${fromAddr}>`, to, replyTo, subject, html: wrap(html) };
+    const message = { from: `"${FROM_NAME}" <${fromAddr}>`, to, replyTo, subject, html: wrap(html), text: toText(html) };
     let info = '';
     if (token) {
       const res = await sendViaApi(token, message);
