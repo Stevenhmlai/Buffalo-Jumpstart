@@ -98,6 +98,7 @@ async function status() {
     smtp: !!smtp,
     redirectUri: redirectUri(),
     lastError: (await getSetting('mail_last_error')) || '',
+    lastSent: (await getSetting('mail_last_sent')) || '',
   };
 }
 
@@ -124,6 +125,8 @@ async function sendViaApi(token, message) {
     const d = await r.json().catch(() => ({}));
     throw new Error(`Gmail API ${r.status}: ${(d.error && d.error.message) || 'send failed'}`);
   }
+  const d = await r.json().catch(() => ({}));
+  return { id: d.id || '', labels: (d.labelIds || []).join(',') };
 }
 
 // ---------- Message building ----------
@@ -156,16 +159,21 @@ async function send(to, subject, html) {
     const fromAddr = token ? ((await db().getSetting('gmail_email')) || GMAIL_USER) : GMAIL_USER;
     const replyTo = process.env.MAIL_REPLY_TO || undefined;
     const message = { from: `"${FROM_NAME}" <${fromAddr}>`, to, replyTo, subject, html: wrap(html) };
+    let info = '';
     if (token) {
-      await sendViaApi(token, message);
+      const res = await sendViaApi(token, message);
+      info = `gmail id ${res.id || '?'} [${res.labels}] from ${fromAddr}`;
     } else if (smtp) {
-      await smtp.sendMail(message);
+      const res = await smtp.sendMail(message);
+      info = `smtp ${res.messageId || ''}`;
     } else {
       console.log(`[mail not set up] To: ${to} | ${subject}`);
       await recordError('Email is not connected. Go to Admin → Settings → Email.');
       return false;
     }
     await recordError('');
+    console.log(`Mail sent: "${subject}" → ${to} (${info})`);
+    try { await db().setSetting('mail_last_sent', `${new Date().toISOString()} "${subject}" → ${to} (${info})`); } catch (e) { /* ignore */ }
     return true;
   } catch (e) {
     console.error('Mail error', to, subject, e.message);

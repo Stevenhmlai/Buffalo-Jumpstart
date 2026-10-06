@@ -18,6 +18,7 @@
     <p class="small muted">Authorised redirect URI for the Google OAuth client: <b><%= email.redirectUri %></b></p>
     <% if (email.smtp) { %><p class="small muted">A Gmail app password is set, but Railway's Hobby plan blocks that kind of connection, so it is only used as a fallback.</p><% } %>
   <% } %>
+  <% if (email.lastSent) { %><p class="tiny muted">Last email sent: <%= email.lastSent %></p><% } %>
   <% if (email.lastError) { %><div class="alert alert-warn small">Last email error: <%= email.lastError %></div><% } %>
 </section>
 <section class="card stack">
