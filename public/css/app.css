@@ -238,3 +238,4 @@ details.box .inner { padding: 16px; }
 
 footer.foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 @media (max-width: 900px) { .aside-first { order: -1; } }
+.confirm-box { display: block; margin-top: 8px; } .confirm-box p { margin: 0 0 8px; }

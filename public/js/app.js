@@ -7,9 +7,38 @@
     t.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 
-  // Confirm dialogs: <form data-confirm="Are you sure?">
+  // Confirmations: <form data-confirm="Are you sure?">
+  // Shown on the page rather than with window.confirm(), which some browsers and
+  // embedded browser panes block silently (the click then does nothing at all).
   document.querySelectorAll('form[data-confirm]').forEach(function (f) {
-    f.addEventListener('submit', function (e) { if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault(); });
+    var box = null;
+    f.addEventListener('submit', function (e) {
+      if (f.dataset.confirmed === '1') { f.dataset.confirmed = ''; return; }
+      e.preventDefault();
+      var submitter = e.submitter || null;
+      if (box) { box.querySelector('[data-yes]').focus(); return; }
+      box = document.createElement('div');
+      box.className = 'alert alert-warn confirm-box';
+      box.setAttribute('role', 'alertdialog');
+      var msg = document.createElement('p');
+      msg.textContent = f.getAttribute('data-confirm');
+      var row = document.createElement('div');
+      row.className = 'row';
+      var yes = document.createElement('button');
+      yes.type = 'button'; yes.className = 'btn btn-sm'; yes.textContent = 'Yes, continue'; yes.setAttribute('data-yes', '');
+      var no = document.createElement('button');
+      no.type = 'button'; no.className = 'btn btn-ghost btn-sm'; no.textContent = 'Cancel';
+      row.appendChild(yes); row.appendChild(no);
+      box.appendChild(msg); box.appendChild(row);
+      f.insertAdjacentElement('afterend', box);
+      yes.addEventListener('click', function () {
+        box.remove(); box = null;
+        f.dataset.confirmed = '1';
+        if (f.requestSubmit) f.requestSubmit(submitter && submitter.form === f ? submitter : undefined); else f.submit();
+      });
+      no.addEventListener('click', function () { box.remove(); box = null; });
+      yes.focus();
+    });
   });
 
   // Busy state: <button data-busy="Adding…"> is disabled and relabelled once its form submits,
