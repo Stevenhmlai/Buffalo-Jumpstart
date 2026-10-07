@@ -3,7 +3,7 @@
   <div class="card stack" style="text-align:center;padding:32px 24px">
     <div style="color:var(--green)"><%- u.icon('check', 56) %></div>
     <h1><%= already ? "You're already checked in" : "You're checked in!" %></h1>
-    <p class="muted"><%= user.name %> · <%= user.agent_code %></p>
+    <p class="muted"><%= u.dn(user) %> · <%= user.agent_code %></p>
     <p>Batch <%= batch.number %> Jumpstart Workshop<br><span class="small muted"><%= u.fmtDate(batch.workshop_start) %> · <%= batch.venue %></span></p>
     <% if (myBatch && myBatch.id !== batch.id) { %>
       <p class="small muted">Your batch stays Batch <%= myBatch.number %>, the first workshop you attended.</p>

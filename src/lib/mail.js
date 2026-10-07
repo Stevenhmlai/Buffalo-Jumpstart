@@ -12,6 +12,7 @@
 // waiting on email and the admin is told honestly when an email did not go out.
 
 const nodemailer = require('nodemailer');
+const { dn, dnFull } = require('./util');
 const MailComposer = require('nodemailer/lib/mail-composer');
 
 const FROM_NAME = process.env.MAIL_FROM_NAME || 'Buffalo Jumpstart';
@@ -205,42 +206,42 @@ const mail = {
   apiConfigured,
   async newRegistrationAlert(adminEmails, u) {
     for (const to of adminEmails) {
-      await send(to, `New Jumpstart registration: ${u.name}`,
-        `<p>${esc(u.name)} (${esc(u.agent_code)}) has registered and is waiting for approval.</p>
+      await send(to, `New Jumpstart registration: ${dnFull(u)}`,
+        `<p>${esc(dnFull(u))} (${esc(u.agent_code)}) has registered and is waiting for approval.</p>
          ${u.upline_not_found ? '<p><b>Note:</b> the upline code they entered is not in the portal.</p>' : ''}
          ${button(baseUrl() + '/admin/approvals', 'Review registration')}`);
     }
   },
   approved(u) {
     return send(u.email, 'Your Buffalo Jumpstart access is approved',
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>Your registration has been approved. You can now log in with your adviser code <b>${esc(u.agent_code)}</b> and the password you chose.</p>
        ${button(baseUrl() + '/login', 'Log in to Buffalo Jumpstart')}`);
   },
   uplineNotified(upline, u) {
-    return send(upline.email, `${u.name} has registered for Buffalo Jumpstart`,
-      `<p>Hi ${esc(upline.name)},</p>
-       <p>Your downline <b>${esc(u.name)}</b> (${esc(u.agent_code)}) has successfully registered for access to the Buffalo Jumpstart portal.</p>
+    return send(upline.email, `${dn(u)} has registered for Buffalo Jumpstart`,
+      `<p>Hi ${esc(dn(upline))},</p>
+       <p>Your downline <b>${esc(dn(u))}</b> (${esc(u.agent_code)}) has successfully registered for access to the Buffalo Jumpstart portal.</p>
        <p>You can follow their progress under "My group".</p>
        ${button(baseUrl() + '/team', 'View my group')}`);
   },
   rejected(u, reason) {
     return send(u.email, 'Your Buffalo Jumpstart registration',
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>We were unable to approve your registration for the Buffalo Jumpstart portal.</p>
        ${reason ? `<p>Reason: ${esc(reason)}</p>` : ''}
        <p>If you think this is a mistake, please contact your upline or the agency.</p>`);
   },
   passwordReset(u, token) {
     return send(u.email, 'Reset your Buffalo Jumpstart password',
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>We received a request to reset your password. This link works for 2 hours.</p>
        ${button(baseUrl() + '/reset/' + token, 'Set a new password')}
        <p>If you did not ask for this, you can ignore this email.</p>`);
   },
   welcomeSetPassword(u, token) {
     return send(u.email, 'Your Buffalo Jumpstart account',
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>An account has been created for you on the Buffalo Jumpstart portal. Your login is your adviser code <b>${esc(u.agent_code)}</b>.</p>
        <p>Please set your password (this link works for 7 days):</p>
        ${button(baseUrl() + '/reset/' + token, 'Set my password')}`);
@@ -251,20 +252,20 @@ const mail = {
   },
   idleReminder(u, nextTitle) {
     return send(u.email, 'Continue your Buffalo Jumpstart training',
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>It has been a week since your last progress on Buffalo Jumpstart.${nextTitle ? ` Up next: <b>${esc(nextTitle)}</b>.` : ''}</p>
        ${button(baseUrl() + '/course', 'Continue training')}`);
   },
   workshopReminder(u, batch, when) {
     return send(u.email, `Reminder: Jumpstart Workshop tomorrow`,
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>This is a reminder that your Jumpstart Workshop (Batch ${batch.number}) is tomorrow.</p>
        <p><b>${esc(when)}</b><br>${esc(batch.venue)}</p>
        <p>Remember to bring your phone: you'll check in by scanning a QR code while logged in to the portal.</p>`);
   },
   zoomReminder(u, batch, z, when) {
     return send(u.email, `Reminder: Jumpstart Zoom session ${z.seq} tomorrow`,
-      `<p>Hi ${esc(u.name)},</p>
+      `<p>Hi ${esc(dn(u))},</p>
        <p>Batch ${batch.number}'s Zoom session ${z.seq} is tomorrow: <b>${esc(when)}</b>.</p>
        <p>The Zoom link is in the portal. During the session you'll be given a 4-digit code to record your attendance.</p>
        ${button(baseUrl() + '/workshop', 'Open the portal')}`);

@@ -64,7 +64,7 @@ function waNumber(mobile) {
   return d;
 }
 
-module.exports = {
+module.exports = { dn, dnFull,
   TZ, fmtDate, fmtDateLong, fmtDateTime, fmtTime, toLocalInput, fromLocalInput, daysSince,
   randomToken, sha256, randomCode4, shuffle, normCode, waNumber,
 };
@@ -87,6 +87,17 @@ const ICONS = {
   qr: '<rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><path d="M14 14h2v2h-2zM18 18h2v2h-2z"/>',
   users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
 };
+// Name to address someone by: their preferred (e.g. English) name if given, else full name
+function dn(u) {
+  if (!u) return '';
+  return String(u.preferred_name || '').trim() || u.name || '';
+}
+// "Steven (Lai Hong Ming)" when the two differ — for admin screens
+function dnFull(u) {
+  const d = dn(u);
+  return u && u.name && d !== u.name ? `${d} (${u.name})` : d;
+}
+
 module.exports.icon = function icon(name, size = 18) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ''}</svg>`;
 };

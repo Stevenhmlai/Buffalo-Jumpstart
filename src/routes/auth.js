@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const rateLimit = require('express-rate-limit');
 const { one, all, q } = require('../db');
 const { requireLogin } = require('../lib/auth');
-const { normCode, randomToken, sha256 } = require('../lib/util');
+const { normCode, randomToken, sha256, dn } = require('../lib/util');
 const mail = require('../lib/mail');
 
 const router = express.Router();
@@ -51,13 +51,14 @@ router.get('/register', (req, res) => {
 router.get('/api/upline', limiter(200), async (req, res) => {
   const code = normCode(req.query.code);
   if (!code) return res.json({ found: false });
-  const u = await one(`SELECT name FROM users WHERE upper(agent_code)=$1 AND status='active'`, [code]);
-  res.json(u ? { found: true, name: u.name } : { found: false });
+  const u = await one(`SELECT name, preferred_name FROM users WHERE upper(agent_code)=$1 AND status='active'`, [code]);
+  res.json(u ? { found: true, name: dn(u) } : { found: false });
 });
 
 router.post('/register', limiter(10), async (req, res) => {
   const form = {
     name: String(req.body.name || '').trim(),
+    preferred_name: String(req.body.preferred_name || '').trim().slice(0, 40),
     code: normCode(req.body.code),
     email: String(req.body.email || '').trim().toLowerCase(),
     mobile: String(req.body.mobile || '').trim(),
@@ -85,9 +86,9 @@ router.post('/register', limiter(10), async (req, res) => {
   const upline = await one(`SELECT id FROM users WHERE upper(agent_code)=$1 AND status='active'`, [form.upline]);
   const hash = await bcrypt.hash(password, 10);
   const u = await one(
-    `INSERT INTO users (agent_code, name, email, mobile, upline_code, password_hash, status, trainee, self_registered)
-     VALUES ($1,$2,$3,$4,$5,$6,'pending',TRUE,TRUE) RETURNING *`,
-    [form.code, form.name, form.email, form.mobile, form.upline, hash]
+    `INSERT INTO users (agent_code, name, preferred_name, email, mobile, upline_code, password_hash, status, trainee, self_registered)
+     VALUES ($1,$2,$7,$3,$4,$5,$6,'pending',TRUE,TRUE) RETURNING *`,
+    [form.code, form.name, form.email, form.mobile, form.upline, hash, form.preferred_name || null]
   );
   const admins = await all(`SELECT email FROM users WHERE is_admin AND status='active' AND email <> ''`);
   mail.newRegistrationAlert(admins.map((a) => a.email), { ...u, upline_not_found: !upline }).catch(() => {});
@@ -114,7 +115,7 @@ router.post('/forgot', limiter(10), async (req, res) => {
 
 async function validReset(token) {
   return one(
-    `SELECT r.*, u.name, u.agent_code FROM password_resets r JOIN users u ON u.id=r.user_id
+    `SELECT r.*, u.name, u.preferred_name, u.agent_code FROM password_resets r JOIN users u ON u.id=r.user_id
       WHERE r.token_hash=$1 AND r.used_at IS NULL AND r.expires_at > now() AND u.status='active'`, [sha256(token)]);
 }
 

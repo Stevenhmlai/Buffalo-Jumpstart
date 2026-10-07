@@ -6,7 +6,8 @@
   <form method="post" action="/admin/advisers" class="stack">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <div class="form-grid">
-      <div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" value="<%= form.name || '' %>" required></div>
+      <div class="field"><label for="name">Full name (as on IC)</label><input id="name" name="name" type="text" value="<%= form.name || '' %>" required></div>
+      <div class="field"><label for="preferred_name">Preferred name <span class="muted">(optional)</span></label><input id="preferred_name" name="preferred_name" type="text" maxlength="40" value="<%= form.preferred_name || '' %>"><span class="hint">e.g. English name. Used to address them; the certificate uses the full name.</span></div>
       <div class="field"><label for="code">Adviser code</label><input id="code" name="code" type="text" value="<%= form.code || '' %>" required></div>
       <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="<%= form.email || '' %>" required></div>
       <div class="field"><label for="mobile">Mobile</label><input id="mobile" name="mobile" type="tel" value="<%= form.mobile || '' %>"></div>

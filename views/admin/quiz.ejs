@@ -61,6 +61,6 @@
 
 <div class="card stack" id="add">
   <h2>Add a question</h2>
-  <%- include('quiz-form', { f: qform('/admin/videos/' + v.id + '/questions', null, 'Add question') }) %>
+  <%- include('quiz-form', { f: qform('/admin/videos/' + v.id + '/questions', draft, 'Add question') }) %>
 </div>
 <%- include('../partials/admin-end') %>

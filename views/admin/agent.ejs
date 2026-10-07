@@ -2,10 +2,10 @@
 <div>
   <a href="/admin/advisers" class="small">← Advisers</a>
   <div class="spread" style="margin-top:6px">
-    <h1><%= a.name %></h1>
+    <h1><%= u.dn(a) %></h1>
     <span class="pill <%= a.status === 'active' ? 'pill-dark' : 'pill-red' %>"><%= a.statusLabel %></span>
   </div>
-  <p class="muted" style="margin-top:4px"><%= a.agent_code %> · <%= groupSize %> in their group</p>
+  <p class="muted" style="margin-top:4px"><%= a.preferred_name && a.preferred_name !== a.name ? a.name + ' · ' : '' %><%= a.agent_code %> · <%= groupSize %> in their group</p>
 </div>
 
 <div class="grid-2" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr)">
@@ -13,7 +13,8 @@
     <h2>Details</h2>
     <form method="post" action="/admin/advisers/<%= a.id %>" class="stack">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
-      <div class="field"><label for="name">Name</label><input id="name" name="name" type="text" value="<%= a.name %>"></div>
+      <div class="field"><label for="name">Full name (on certificate)</label><input id="name" name="name" type="text" value="<%= a.name %>"></div>
+      <div class="field"><label for="preferred_name">Preferred name <span class="muted">(optional)</span></label><input id="preferred_name" name="preferred_name" type="text" maxlength="40" value="<%= a.preferred_name || '' %>"><span class="hint">e.g. English name. Used to address them; the certificate uses the full name.</span></div>
       <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" value="<%= a.email %>"></div>
       <div class="field"><label for="mobile">Mobile</label><input id="mobile" name="mobile" type="tel" value="<%= a.mobile || '' %>"></div>
       <label class="check"><input type="checkbox" name="trainee" value="1" <%= a.trainee ? 'checked' : '' %>>Enrolled in Buffalo Jumpstart</label>
@@ -26,7 +27,7 @@
       <dt>Course completed</dt><dd><%= a.course.certificateReady ? u.fmtDate(a.course_completed_at) : '—' %></dd>
     </dl>
     <% if (a.status === 'active') { %>
-      <form method="post" action="/admin/advisers/<%= a.id %>/send-reset" class="inline" data-confirm="Email <%= a.name %> a link to set a new password?">
+      <form method="post" action="/admin/advisers/<%= a.id %>/send-reset" class="inline" data-confirm="Email <%= u.dn(a) %> a link to set a new password?">
         <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn" type="submit" data-busy="Sending…">Email a set-password link</button>
       </form>
     <% } %>
@@ -35,14 +36,14 @@
   <div class="stack">
     <section class="card stack">
       <h2>Upline</h2>
-      <p>Current: <b><%= a.upline_code || 'None' %></b><%= uplineUser ? ' — ' + uplineUser.name : (a.upline_code ? ' (not in the portal yet)' : '') %></p>
-      <form method="post" action="/admin/advisers/<%= a.id %>/upline" class="stack" data-confirm="Change the upline? <%= a.name %>'s whole group will move with them.">
+      <p>Current: <b><%= a.upline_code || 'None' %></b><%= uplineUser ? ' — ' + u.dnFull(uplineUser) : (a.upline_code ? ' (not in the portal yet)' : '') %></p>
+      <form method="post" action="/admin/advisers/<%= a.id %>/upline" class="stack" data-confirm="Change the upline? <%= u.dn(a) %>'s whole group will move with them.">
         <input type="hidden" name="_csrf" value="<%= csrf %>">
         <div class="field"><label for="upline">New upline adviser code</label><input id="upline" name="upline" type="text" value="<%= a.upline_code || '' %>"></div>
         <div class="field"><label for="note">Note (optional)</label><input id="note" name="note" type="text" placeholder="e.g. January restructure"></div>
         <div><button class="btn btn-dark" type="submit">Change upline</button></div>
       </form>
-      <p class="tiny muted">Everyone below <%= a.name %> moves with them. Every change is logged.</p>
+      <p class="tiny muted">Everyone below <%= u.dn(a) %> moves with them. Every change is logged.</p>
     </section>
 
     <section class="card stack">
@@ -75,13 +76,13 @@
     <h2>Account</h2>
     <% if (a.status === 'active') { %>
       <p class="small muted">Deactivate when an adviser is terminated. They can no longer log in, but their training record is kept.</p>
-      <form method="post" action="/admin/advisers/<%= a.id %>/deactivate" class="stack" data-confirm="Deactivate <%= a.name %>?">
+      <form method="post" action="/admin/advisers/<%= a.id %>/deactivate" class="stack" data-confirm="Deactivate <%= u.dn(a) %>?">
         <input type="hidden" name="_csrf" value="<%= csrf %>">
         <% if (direct.length) { %>
           <div class="field" style="max-width:360px">
             <label for="move_to">Move their <%= direct.length %> direct downline<%= direct.length > 1 ? 's' : '' %> to (adviser code)</label>
             <input id="move_to" name="move_to" type="text" value="<%= a.upline_code || '' %>">
-            <span class="hint">Their whole groups move with them. Defaults to <%= a.name %>'s upline.</span>
+            <span class="hint">Their whole groups move with them. Defaults to <%= u.dn(a) %>'s upline.</span>
           </div>
         <% } %>
         <div><button class="btn btn-ghost" type="submit">Deactivate account</button></div>

@@ -38,8 +38,8 @@
       <% if (!attendees.length) { %><p class="small muted">No check-ins yet.</p><% } %>
       <% attendees.forEach(function (p) { %>
         <div class="spread small" style="border-bottom:1px solid #F0EAE0;padding:4px 0">
-          <span><a href="/admin/advisers/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.method === 'qr' ? 'QR' : 'manual' %></span></span>
-          <form method="post" action="/admin/batches/<%= b.id %>/unmark/<%= p.id %>" class="inline" data-confirm="Remove <%= p.name %>'s workshop attendance?">
+          <span><a href="/admin/advisers/<%= p.id %>"><%= u.dnFull(p) %></a> <span class="muted"><%= p.agent_code %> · <%= p.method === 'qr' ? 'QR' : 'manual' %></span></span>
+          <form method="post" action="/admin/batches/<%= b.id %>/unmark/<%= p.id %>" class="inline" data-confirm="Remove <%= u.dnFull(p) %>'s workshop attendance?">
             <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn tiny" type="submit">Remove</button>
           </form>
         </div>
@@ -49,7 +49,7 @@
       <h3><%= workshopOver ? 'Registered but absent' : 'Registered, not checked in' %> (<%= registeredAbsent.length %>)</h3>
       <% if (!registeredAbsent.length) { %><p class="small muted">Nobody.</p><% } %>
       <% registeredAbsent.forEach(function (p) { %>
-        <div class="small" style="border-bottom:1px solid #F0EAE0;padding:4px 0"><a href="/admin/advisers/<%= p.id %>"><%= p.name %></a> <span class="muted"><%= p.agent_code %> · <%= p.mobile || '' %></span></div>
+        <div class="small" style="border-bottom:1px solid #F0EAE0;padding:4px 0"><a href="/admin/advisers/<%= p.id %>"><%= u.dnFull(p) %></a> <span class="muted"><%= p.agent_code %> · <%= p.mobile || '' %></span></div>
       <% }) %>
     </div>
   </div>
@@ -93,7 +93,7 @@
         <tbody>
         <% if (!members.length) { %><tr><td colspan="3" class="muted">No batch members yet (members join a batch by attending its workshop).</td></tr><% } %>
         <% members.forEach(function (p) { var here = present.has(p.id); %>
-          <tr><td><%= p.name %> <span class="sub"><%= p.agent_code %></span></td>
+          <tr><td><%= u.dnFull(p) %> <span class="sub"><%= p.agent_code %></span></td>
             <td><% if (here) { %><span class="pill pill-green">Present</span><% } else if (zi.over) { %><span class="pill pill-red">Absent</span><% } else { %><span class="pill pill-grey">—</span><% } %></td>
             <td><% if (here) { %><form method="post" action="/admin/zoom/<%= z.id %>/unmark/<%= p.id %>" class="inline"><input type="hidden" name="_csrf" value="<%= csrf %>"><button class="linkbtn tiny" type="submit">Remove</button></form><% } %></td></tr>
         <% }) %>

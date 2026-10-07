@@ -239,3 +239,6 @@ details.box .inner { padding: 16px; }
 footer.foot { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 16px 40px; }
 @media (max-width: 900px) { .aside-first { order: -1; } }
 .confirm-box { display: block; margin-top: 8px; } .confirm-box p { margin: 0 0 8px; }
+.field-msg { display: block; color: var(--red); font-size: 13px; font-weight: 600; margin-top: 4px; }
+input.is-invalid, select.is-invalid, textarea.is-invalid { border-color: var(--red); box-shadow: 0 0 0 2px rgba(163, 18, 27, .15); }
+.opt-row .field-msg { flex-basis: 100%; }

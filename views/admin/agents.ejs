@@ -26,7 +26,7 @@
     <% rows.forEach(function (r) {
       var cls = r.statusLabel === 'Completed' ? 'pill-green' : /Idle|Not started ·/.test(r.statusLabel) ? 'pill-gold' : r.status !== 'active' ? 'pill-red' : r.statusLabel === 'In progress' ? 'pill-dark' : 'pill-grey'; %>
       <tr>
-        <td><a class="name" href="/admin/advisers/<%= r.id %>"><%= r.name %></a><div class="sub"><%= r.agent_code %><%= r.is_admin ? ' · Admin' : '' %></div></td>
+        <td><a class="name" href="/admin/advisers/<%= r.id %>"><%= u.dn(r) %></a><div class="sub"><%= r.preferred_name && r.preferred_name !== r.name ? r.name + ' · ' : '' %><%= r.agent_code %><%= r.is_admin ? ' · Admin' : '' %></div></td>
         <td><%= r.upline_name || '—' %><div class="sub"><%= r.upline_code || '' %></div></td>
         <td class="small"><%= u.fmtDate(r.approved_at) || '—' %></td>
         <td><% if (r.trainee) { %><div class="mini-bar"><div class="bar"><span style="width:<%= r.course.percent %>%"></span></div><span class="tiny"><%= r.course.modulesDone %>/<%= r.course.modulesTotal %></span></div><% } else { %><span class="tiny muted">—</span><% } %></td>

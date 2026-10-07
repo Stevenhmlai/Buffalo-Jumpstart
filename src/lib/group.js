@@ -11,7 +11,7 @@ async function groupOf(agentCode) {
          FROM users u JOIN g ON upper(u.upline_code) = upper(g.agent_code)
         WHERE u.status = 'active' AND g.depth < 10
      )
-     SELECT DISTINCT ON (u.id) u.*, g.depth, up.name AS upline_name
+     SELECT DISTINCT ON (u.id) u.*, g.depth, COALESCE(NULLIF(up.preferred_name, ''), up.name) AS upline_name
        FROM g JOIN users u ON u.id = g.id
        LEFT JOIN users up ON upper(up.agent_code) = upper(u.upline_code)
       ORDER BY u.id, g.depth`,

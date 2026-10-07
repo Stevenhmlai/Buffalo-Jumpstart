@@ -3,7 +3,8 @@
   <h1 style="margin-bottom:16px">My account</h1>
   <div class="card stack" style="margin-bottom:16px">
     <dl class="kv">
-      <dt>Name</dt><dd><%= user.name %></dd>
+      <dt>Full name</dt><dd><%= user.name %></dd>
+      <dt>Preferred name</dt><dd><%= user.preferred_name || '—' %></dd>
       <dt>Adviser code</dt><dd><%= user.agent_code %></dd>
       <dt>Email</dt><dd><%= user.email %></dd>
       <dt>Mobile</dt><dd><%= user.mobile || '—' %></dd>

@@ -26,7 +26,7 @@
       <div class="card tight stack" style="gap:10px">
         <div class="spread" style="align-items:flex-start">
           <div>
-            <div style="font-weight:700"><%= r.name %></div>
+            <div style="font-weight:700"><%= u.dn(r) %></div>
             <div class="tiny muted"><%= r.agent_code %> · <%= r.depth === 1 ? 'direct' : 'via ' + (r.upline_name || r.upline_code) %><%= r.batch ? ' · Batch ' + r.batch : '' %></div>
           </div>
           <% if (!r.trainee) { %><span class="pill pill-grey">Not enrolled</span>

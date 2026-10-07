@@ -12,6 +12,12 @@
       <div class="field">
         <label for="name">Full name</label>
         <input id="name" name="name" type="text" autocomplete="name" value="<%= form.name || '' %>" required>
+        <span class="hint">As in your IC or adviser licence. Shown on your certificate.</span>
+      </div>
+      <div class="field">
+        <label for="preferred_name">Preferred name <span class="muted">(optional)</span></label>
+        <input id="preferred_name" name="preferred_name" type="text" autocomplete="nickname" maxlength="40" value="<%= form.preferred_name || '' %>">
+        <span class="hint">e.g. your English name. We'll use it to address you in the portal and emails.</span>
       </div>
       <div class="field">
         <label for="code">Your adviser code</label>

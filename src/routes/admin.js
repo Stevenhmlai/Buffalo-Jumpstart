@@ -97,8 +97,8 @@ router.post('/approvals/:id/approve', async (req, res) => {
   const sent = await mail.approved(u);
   const upline = await one(`SELECT * FROM users WHERE upper(agent_code)=upper($1) AND status='active'`, [u.upline_code]);
   const upSent = upline ? await mail.uplineNotified(upline, u) : false;
-  if (sent) req.flash('ok', `${u.name} approved and emailed.${upSent ? ' Their upline has been emailed too.' : ''}`);
-  else req.flash('warn', `${u.name} approved.` + NOMAIL);
+  if (sent) req.flash('ok', `${U.dn(u)} approved and emailed.${upSent ? ' Their upline has been emailed too.' : ''}`);
+  else req.flash('warn', `${U.dn(u)} approved.` + NOMAIL);
   res.redirect('/admin/approvals');
 });
 
@@ -107,15 +107,15 @@ router.post('/approvals/:id/reject', async (req, res) => {
   if (!u) return res.redirect('/admin/approvals');
   const reason = String(req.body.reason || '').trim();
   await q(`UPDATE users SET status='rejected', rejected_reason=$2, approved_by=$3, approved_at=now() WHERE id=$1`, [u.id, reason || null, req.user.id]);
-  if (await mail.rejected(u, reason)) req.flash('ok', `${u.name}'s registration was rejected and they have been emailed.`);
-  else req.flash('warn', `${u.name}'s registration was rejected.` + NOMAIL);
+  if (await mail.rejected(u, reason)) req.flash('ok', `${U.dn(u)}'s registration was rejected and they have been emailed.`);
+  else req.flash('warn', `${U.dn(u)}'s registration was rejected.` + NOMAIL);
   res.redirect('/admin/approvals');
 });
 
 // ================= Advisers =================
 async function agentRows(where = 'TRUE', params = []) {
   const users = await all(
-    `SELECT u.*, up.name AS upline_name FROM users u
+    `SELECT u.*, COALESCE(NULLIF(up.preferred_name, ''), up.name) AS upline_name FROM users u
        LEFT JOIN users up ON upper(up.agent_code)=upper(u.upline_code)
       WHERE ${where} ORDER BY u.created_at DESC`, params);
   const videos = await progress.getVideos();
@@ -145,7 +145,7 @@ router.get('/advisers', async (req, res) => {
   let rows = await agentRows(`u.status <> 'rejected'`);
   if (search) {
     const s = search.toLowerCase();
-    rows = rows.filter((r) => [r.name, r.agent_code, r.upline_code, r.upline_name, r.email].some((v) => String(v || '').toLowerCase().includes(s)));
+    rows = rows.filter((r) => [r.name, r.preferred_name, r.agent_code, r.upline_code, r.upline_name, r.email].some((v) => String(v || '').toLowerCase().includes(s)));
   }
   if (status === 'training') rows = rows.filter((r) => r.status === 'active' && r.trainee && !r.course.certificateReady);
   else if (status === 'idle') rows = rows.filter((r) => r.status === 'active' && r.trainee && !r.course.certificateReady && r.idleDays >= 7);
@@ -164,6 +164,7 @@ router.post('/advisers', async (req, res) => {
   nav(res, 'agents');
   const form = {
     name: String(req.body.name || '').trim(), code: U.normCode(req.body.code),
+    preferred_name: String(req.body.preferred_name || '').trim().slice(0, 40),
     email: String(req.body.email || '').trim().toLowerCase(), mobile: String(req.body.mobile || '').trim(),
     upline: U.normCode(req.body.upline), trainee: !!req.body.trainee, is_admin: !!req.body.is_admin,
   };
@@ -175,13 +176,13 @@ router.post('/advisers', async (req, res) => {
   if (errors.length) return res.status(400).render('admin/agent-new', { title: 'Add adviser', errors, form });
   const randomPw = await bcrypt.hash(U.randomToken(), 10);
   const u = await one(
-    `INSERT INTO users (agent_code, name, email, mobile, upline_code, password_hash, status, is_admin, trainee, approved_at, approved_by)
-     VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8,now(),$9) RETURNING *`,
-    [form.code, form.name, form.email, form.mobile, form.upline || null, randomPw, form.is_admin, form.trainee, req.user.id]);
+    `INSERT INTO users (agent_code, name, email, mobile, upline_code, password_hash, status, is_admin, trainee, approved_at, approved_by, preferred_name)
+     VALUES ($1,$2,$3,$4,$5,$6,'active',$7,$8,now(),$9,$10) RETURNING *`,
+    [form.code, form.name, form.email, form.mobile, form.upline || null, randomPw, form.is_admin, form.trainee, req.user.id, form.preferred_name || null]);
   const token = U.randomToken();
   await q(`INSERT INTO password_resets (token_hash, user_id, expires_at) VALUES ($1,$2, now() + interval '7 days')`, [U.sha256(token), u.id]);
-  if (await mail.welcomeSetPassword(u, token)) req.flash('ok', `${u.name} has been added and emailed a link to set their password.`);
-  else req.flash('warn', `${u.name} has been added, but the set-password email could not be sent. Use "Email a set-password link" below once email is working.`);
+  if (await mail.welcomeSetPassword(u, token)) req.flash('ok', `${U.dn(u)} has been added and emailed a link to set their password.`);
+  else req.flash('warn', `${U.dn(u)} has been added, but the set-password email could not be sent. Use "Email a set-password link" below once email is working.`);
   res.redirect('/admin/advisers/' + u.id);
 });
 
@@ -203,7 +204,7 @@ router.get('/advisers/:id', async (req, res) => {
   const changes = await all(
     `SELECT c.*, x.name AS by_name FROM upline_changes c LEFT JOIN users x ON x.id=c.changed_by WHERE c.user_id=$1 ORDER BY c.changed_at DESC`, [a.id]);
   const uplineUser = a.upline_code ? await one('SELECT * FROM users WHERE upper(agent_code)=upper($1)', [a.upline_code]) : null;
-  res.render('admin/agent', { title: a.name, a, groupSize: group.length, direct, attempts, workshops, zooms, changes, uplineUser });
+  res.render('admin/agent', { title: U.dn(a), a, groupSize: group.length, direct, attempts, workshops, zooms, changes, uplineUser });
 });
 
 router.post('/advisers/:id', async (req, res) => {
@@ -212,10 +213,11 @@ router.post('/advisers/:id', async (req, res) => {
   const name = String(req.body.name || '').trim() || a.name;
   const email = String(req.body.email || '').trim().toLowerCase();
   const mobile = String(req.body.mobile || '').trim();
+  const preferred = String(req.body.preferred_name || '').trim().slice(0, 40) || null;
   let isAdmin = !!req.body.is_admin;
   if (a.id === req.user.id && !isAdmin) { isAdmin = true; req.flash('warn', "You can't remove your own admin access."); }
-  await q('UPDATE users SET name=$2, email=$3, mobile=$4, trainee=$5, is_admin=$6 WHERE id=$1',
-    [a.id, name, email, mobile, !!req.body.trainee, isAdmin]);
+  await q('UPDATE users SET name=$2, email=$3, mobile=$4, trainee=$5, is_admin=$6, preferred_name=$7 WHERE id=$1',
+    [a.id, name, email, mobile, !!req.body.trainee, isAdmin, preferred]);
   if (!req.session.flash) req.flash('ok', 'Details saved.');
   res.redirect('/admin/advisers/' + a.id);
 });
@@ -228,7 +230,7 @@ router.post('/advisers/:id/upline', async (req, res) => {
   if (nu) {
     const below = await groupOf(a.agent_code);
     if (below.some((m) => U.normCode(m.agent_code) === nu)) {
-      req.flash('warn', `${nu} is in ${a.name}'s own group, so it can't be their upline.`);
+      req.flash('warn', `${nu} is in ${U.dn(a)}'s own group, so it can't be their upline.`);
       return res.redirect('/admin/advisers/' + a.id);
     }
   }
@@ -236,7 +238,7 @@ router.post('/advisers/:id/upline', async (req, res) => {
     await q('UPDATE users SET upline_code=$2 WHERE id=$1', [a.id, nu]);
     await q('INSERT INTO upline_changes (user_id, old_upline, new_upline, changed_by, note) VALUES ($1,$2,$3,$4,$5)',
       [a.id, a.upline_code, nu, req.user.id, String(req.body.note || '').trim() || null]);
-    req.flash('ok', `Upline changed to ${nu || 'none'}. ${a.name}'s whole group moved with them.`);
+    req.flash('ok', `Upline changed to ${nu || 'none'}. ${U.dn(a)}'s whole group moved with them.`);
   }
   res.redirect('/admin/advisers/' + a.id);
 });
@@ -257,7 +259,7 @@ router.post('/advisers/:id/deactivate', async (req, res) => {
     await client.query(`UPDATE users SET status='inactive', deactivated_at=now() WHERE id=$1`, [a.id]);
     await client.query('COMMIT');
   } catch (e) { await client.query('ROLLBACK'); throw e; } finally { client.release(); }
-  req.flash('ok', `${a.name} deactivated.${direct.length ? ` ${direct.length} direct downline(s) moved to ${moveTo || 'no upline'}.` : ''} Training records are kept.`);
+  req.flash('ok', `${U.dn(a)} deactivated.${direct.length ? ` ${direct.length} direct downline(s) moved to ${moveTo || 'no upline'}.` : ''} Training records are kept.`);
   res.redirect('/admin/advisers/' + a.id);
 });
 
@@ -281,7 +283,7 @@ router.post('/advisers/:id/send-reset', async (req, res) => {
 router.get('/changes', async (req, res) => {
   nav(res, 'agents');
   const rows = await all(
-    `SELECT c.*, u.name, u.agent_code, x.name AS by_name FROM upline_changes c JOIN users u ON u.id=c.user_id
+    `SELECT c.*, u.name, u.preferred_name, u.agent_code, x.name AS by_name FROM upline_changes c JOIN users u ON u.id=c.user_id
        LEFT JOIN users x ON x.id=c.changed_by ORDER BY c.changed_at DESC LIMIT 300`);
   res.render('admin/changes', { title: 'Upline change log', rows });
 });
@@ -319,7 +321,16 @@ router.get('/videos/:id/quiz', async (req, res) => {
   if (!v) return res.redirect('/admin/videos');
   const questions = await all('SELECT * FROM questions WHERE video_id=$1 ORDER BY position, id', [v.id]);
   const moduleNo = (await one(`SELECT count(*)::int AS n FROM videos WHERE kind='module' AND position <= $1`, [v.position])).n;
-  res.render('admin/quiz', { title: `Module ${moduleNo} quiz`, v, questions, moduleNo, edit: req.query.edit ? Number(req.query.edit) : null });
+  let draft = null;
+  const d = req.session.quizDraft;
+  if (d && d.videoId === v.id) {
+    const b = d.body || {};
+    const qtype = b.qtype === 'tf' ? 'tf' : 'mc';
+    draft = { qtype, text: String(b.text || ''), options: [b.o0, b.o1, b.o2, b.o3, b.o4].map((x) => String(x || '')),
+      correct: b.correct === undefined ? -1 : parseInt(b.correct, 10) };
+  }
+  delete req.session.quizDraft;
+  res.render('admin/quiz', { title: `Module ${moduleNo} quiz`, v, questions, moduleNo, draft, edit: req.query.edit ? Number(req.query.edit) : null });
 });
 
 function readQuestion(body) {
@@ -344,7 +355,11 @@ router.post('/videos/:id/questions', async (req, res) => {
   const v = await one(`SELECT * FROM videos WHERE id=$1 AND kind='module'`, [req.params.id]);
   if (!v) return res.redirect('/admin/videos');
   const qq = readQuestion(req.body);
-  if (qq.error) { req.flash('warn', qq.error); return res.redirect(`/admin/videos/${v.id}/quiz#add`); }
+  if (qq.error) {
+    req.flash('warn', qq.error);
+    req.session.quizDraft = { videoId: v.id, body: req.body };   // keep what was typed
+    return res.redirect(`/admin/videos/${v.id}/quiz#add`);
+  }
   const pos = (await one('SELECT coalesce(max(position),0)+1 AS p FROM questions WHERE video_id=$1', [v.id])).p;
   await q('INSERT INTO questions (video_id, position, qtype, text, options, correct) VALUES ($1,$2,$3,$4,$5,$6)',
     [v.id, pos, qq.qtype, qq.text, JSON.stringify(qq.options), qq.correct]);
@@ -516,7 +531,7 @@ router.post('/batches/:id/mark', async (req, res) => {
   if (!u) { req.flash('warn', 'No active member with that adviser code.'); return res.redirect('/admin/batches/' + req.params.id + '#workshop'); }
   await q(`INSERT INTO workshop_attendance (user_id, batch_id, method, recorded_by) VALUES ($1,$2,'manual',$3) ON CONFLICT DO NOTHING`, [u.id, b.id, req.user.id]);
   await q('INSERT INTO workshop_registrations (user_id, batch_id) VALUES ($1,$2) ON CONFLICT DO NOTHING', [u.id, b.id]);
-  req.flash('ok', `${u.name} marked present at the workshop.`);
+  req.flash('ok', `${U.dn(u)} marked present at the workshop.`);
   res.redirect('/admin/batches/' + b.id + '#workshop');
 });
 
@@ -531,7 +546,7 @@ router.post('/zoom/:id/mark', async (req, res) => {
   const u = z && (await userByCode(req.body.code));
   if (!u) { req.flash('warn', 'No active member with that adviser code.'); return res.redirect('/admin/batches/' + (z ? z.batch_id : '')); }
   await q(`INSERT INTO zoom_attendance (user_id, zoom_session_id, method, recorded_by) VALUES ($1,$2,'manual',$3) ON CONFLICT DO NOTHING`, [u.id, z.id, req.user.id]);
-  req.flash('ok', `${u.name} marked present for Zoom session ${z.seq}.`);
+  req.flash('ok', `${U.dn(u)} marked present for Zoom session ${z.seq}.`);
   res.redirect('/admin/batches/' + z.batch_id + '#zoom' + z.seq);
 });
 
@@ -566,7 +581,7 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(`Batch ${det.b.number}`);
   ws.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
+    { header: 'Full name', key: 'name', width: 28 }, { header: 'Preferred name', key: 'pname', width: 16 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Upline name', key: 'upline_name', width: 24 },
     { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
     { header: 'Videos completed', key: 'completed', width: 16 },
@@ -574,12 +589,12 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
     ...det.zs.map((z) => ({ header: `Zoom ${z.seq}`, key: 'z' + z.seq, width: 10 })),
     { header: 'Zoom total', key: 'ztotal', width: 10 },
   ];
-  const uplines = await all(`SELECT agent_code, name FROM users`);
-  const upName = Object.fromEntries(uplines.map((x) => [x.agent_code.toUpperCase(), x.name]));
+  const uplines = await all(`SELECT agent_code, name, preferred_name FROM users`);
+  const upName = Object.fromEntries(uplines.map((x) => [x.agent_code.toUpperCase(), U.dn(x)]));
   for (const p of people) {
     const c = progress.buildCourse(videos, progs[p.id]);
     const row = {
-      name: p.name, code: p.agent_code, upline: p.upline_code || '', upline_name: upName[String(p.upline_code || '').toUpperCase()] || '',
+      name: p.name, pname: p.preferred_name || '', code: p.agent_code, upline: p.upline_code || '', upline_name: upName[String(p.upline_code || '').toUpperCase()] || '',
       email: p.email, mobile: p.mobile || '', completed: c.certificateReady ? d(p.course_completed_at) : `In progress (${c.modulesDone}/${c.modulesTotal})`,
       workshop: 'Present', method: p.method === 'qr' ? 'QR' : 'Manual', ztotal: 0,
     };
@@ -593,10 +608,10 @@ router.get('/batches/:id/export.xlsx', async (req, res) => {
   styleSheet(ws);
   const ws2 = wb.addWorksheet('Registered, absent');
   ws2.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
+    { header: 'Full name', key: 'name', width: 28 }, { header: 'Preferred name', key: 'pname', width: 16 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
   ];
-  for (const p of det.registeredAbsent) ws2.addRow({ name: p.name, code: p.agent_code, upline: p.upline_code || '', email: p.email, mobile: p.mobile || '' });
+  for (const p of det.registeredAbsent) ws2.addRow({ name: p.name, pname: p.preferred_name || '', code: p.agent_code, upline: p.upline_code || '', email: p.email, mobile: p.mobile || '' });
   styleSheet(ws2);
   await sendWorkbook(res, wb, `Jumpstart-Batch-${det.b.number}.xlsx`);
 });
@@ -610,7 +625,7 @@ router.get('/export/advisers.xlsx', async (req, res) => {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Advisers');
   ws.columns = [
-    { header: 'Name', key: 'name', width: 28 }, { header: 'Adviser code', key: 'code', width: 14 },
+    { header: 'Full name', key: 'name', width: 28 }, { header: 'Preferred name', key: 'pname', width: 16 }, { header: 'Adviser code', key: 'code', width: 14 },
     { header: 'Upline code', key: 'upline', width: 14 }, { header: 'Upline name', key: 'upline_name', width: 24 },
     { header: 'Email', key: 'email', width: 28 }, { header: 'Mobile', key: 'mobile', width: 16 },
     { header: 'Account', key: 'account', width: 10 }, { header: 'Enrolled', key: 'trainee', width: 10 },
@@ -622,7 +637,7 @@ router.get('/export/advisers.xlsx', async (req, res) => {
   ];
   for (const r of rows) {
     const row = {
-      name: r.name, code: r.agent_code, upline: r.upline_code || '', upline_name: r.upline_name || '', email: r.email, mobile: r.mobile || '',
+      name: r.name, pname: r.preferred_name || '', code: r.agent_code, upline: r.upline_code || '', upline_name: r.upline_name || '', email: r.email, mobile: r.mobile || '',
       account: r.status === 'active' ? 'Active' : 'Inactive', trainee: r.trainee ? 'Yes' : 'No', approved: d(r.approved_at),
       status: r.statusLabel, done: `${r.course.modulesDone}/${r.course.modulesTotal}`,
       completed: r.course.certificateReady ? d(r.course_completed_at) : '', last: d(r.last_activity_at),

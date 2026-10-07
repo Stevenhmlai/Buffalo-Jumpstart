@@ -11,7 +11,7 @@
   <div class="card stack">
     <div class="spread" style="align-items:flex-start">
       <div>
-        <h2><%= p.name %></h2>
+        <h2><%= u.dnFull(p) %></h2>
         <p class="small muted">Registered <%= u.fmtDateTime(p.created_at) %></p>
       </div>
       <% if (!p.upline_name) { %><span class="pill pill-gold">Upline not found</span><% } %>
@@ -47,7 +47,7 @@
     <thead><tr><th>Name</th><th>Code</th><th>Decision</th><th>By</th><th>When</th></tr></thead>
     <tbody>
     <% recent.forEach(function (r) { %>
-      <tr><td><a class="name" href="/admin/advisers/<%= r.id %>"><%= r.name %></a></td><td><%= r.agent_code %></td>
+      <tr><td><a class="name" href="/admin/advisers/<%= r.id %>"><%= u.dnFull(r) %></a></td><td><%= r.agent_code %></td>
         <td><span class="pill <%= r.status === 'rejected' ? 'pill-red' : 'pill-green' %>"><%= r.status === 'rejected' ? 'Rejected' : 'Approved' %></span></td>
         <td><%= r.approver || '—' %></td><td class="small"><%= u.fmtDate(r.approved_at) %></td></tr>
     <% }) %>

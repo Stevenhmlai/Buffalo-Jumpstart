@@ -41,6 +41,41 @@
     });
   });
 
+  // Form problems (empty required box, bad email…) shown on the page, next to the field.
+  // Browsers normally use a small pop-up bubble, which some browsers and embedded
+  // browser panes never show, so the Save button just seemed to do nothing.
+  var firstInvalidAt = 0;
+  document.addEventListener('invalid', function (e) {
+    var el = e.target;
+    e.preventDefault();
+    var holder = el.closest('.field') || el.closest('.opt-row') || el.parentNode;
+    var msg = holder.querySelector(':scope > .field-msg');
+    if (!msg) {
+      msg = document.createElement('span');
+      msg.className = 'field-msg';
+      msg.setAttribute('role', 'alert');
+      holder.appendChild(msg);
+    }
+    msg.textContent = el.validationMessage || 'Please check this field.';
+    el.classList.add('is-invalid');
+    var now = Date.now();
+    if (now - firstInvalidAt > 300) {           // first problem of this submit attempt
+      firstInvalidAt = now;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.focus({ preventScroll: true });
+    }
+  }, true);
+  var clearInvalid = function (e) {
+    var el = e.target;
+    if (!el.classList || !el.classList.contains('is-invalid') || !el.checkValidity()) return;
+    el.classList.remove('is-invalid');
+    var holder = el.closest('.field') || el.closest('.opt-row') || el.parentNode;
+    var msg = holder && holder.querySelector(':scope > .field-msg');
+    if (msg) msg.remove();
+  };
+  document.addEventListener('input', clearInvalid, true);
+  document.addEventListener('change', clearInvalid, true);
+
   // Busy state: <button data-busy="Adding…"> is disabled and relabelled once its form submits,
   // so a slow request can't be submitted twice and the admin can see something is happening.
   document.querySelectorAll('form').forEach(function (f) {
@@ -61,7 +96,7 @@
       var code = up.value.trim();
       if (code.length < 3) { out.textContent = ''; out.className = 'upline-check'; return; }
       fetch('/api/upline?code=' + encodeURIComponent(code)).then(function (r) { return r.json(); }).then(function (d) {
-        if (d.found) { out.textContent = 'Your upline: ' + d.name + '. Is this correct?'; out.className = 'upline-check ok'; }
+        if (d.found) { out.textContent = 'Your upline is ' + d.name + '.'; out.className = 'upline-check ok'; }
         else { out.textContent = "We couldn't find this code. You can still register, and an admin will check it."; out.className = 'upline-check no'; }
       }).catch(function () {});
     };

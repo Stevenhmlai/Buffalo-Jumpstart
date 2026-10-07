@@ -138,3 +138,6 @@ CREATE TABLE IF NOT EXISTS reminders_sent (
   sent_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   PRIMARY KEY (kind, user_id, ref_id)
 );
+
+-- Preferred / English name used to address the adviser (optional)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS preferred_name TEXT;

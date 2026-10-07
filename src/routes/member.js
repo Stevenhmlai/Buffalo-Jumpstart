@@ -133,7 +133,7 @@ router.get('/team', requireLogin, async (req, res) => {
       notStarted: inTraining && c.modulesDone === 0 && c.modules.every((x) => !x.watched),
       batch: batchNums[m.id] || null, zoom: zoomCounts[m.id] || 0,
       wa: waNumber(m.mobile),
-      waText: `Hi ${m.name}, just checking in on your Buffalo Jumpstart training. ` +
+      waText: `Hi ${require('../lib/util').dn(m)}, just checking in on your Buffalo Jumpstart training. ` +
         (c.nextLabel ? `Your next step is ${c.nextLabel}. ` : '') + `Keep going! ${require('../lib/mail').baseUrl()}/course`,
     };
   });
@@ -146,7 +146,7 @@ router.get('/team', requireLogin, async (req, res) => {
   if (filter === 'nudge') shown = rows.filter((r) => r.needsNudge);
   else if (filter === 'completed') shown = rows.filter((r) => r.trainee && r.course.certificateReady);
   else if (filter === 'training') shown = rows.filter((r) => r.inTraining);
-  shown.sort((a, b) => (b.needsNudge - a.needsNudge) || (a.depth - b.depth) || a.name.localeCompare(b.name));
+  shown.sort((a, b) => (b.needsNudge - a.needsNudge) || (a.depth - b.depth) || require('../lib/util').dn(a).localeCompare(require('../lib/util').dn(b)));
   res.render('team', { title: 'My group', rows: shown, stats, filter, total: rows.length });
 });
 
