@@ -85,6 +85,88 @@ module.exports = {
     },
   ],
 
+  // Module 5 — Basic Portfolio Management
+  5: [
+    {
+      qtype: 'mc',
+      text: 'Asset allocation means spreading an investment across different asset classes (such as stocks, bonds and cash) based on what?',
+      options: [
+        'Whichever fund performed best last year',
+        'The investor\'s goals, risk tolerance and time horizon',
+        'The fund with the lowest sales charge',
+        'An equal split across every fund available',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'In asset allocation, what does "return optimisation" mainly mean for an adviser?',
+      options: [
+        'Always choosing the highest-risk funds to maximise return',
+        'Managing the client\'s expectations — giving them what they want, not what the adviser wants',
+        'Switching funds every month to chase the top performer',
+        'Promising the client a fixed return',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'You are planning a 10-year education fund for a client\'s child. What is the recommended approach?',
+      options: [
+        'Keep it all in money market for the full 10 years',
+        'Stay fully in equities right up to the day the money is needed',
+        'Go mainly into equities in the early years, then switch to bonds or lower-risk funds around years 8–9 to protect the capital',
+        'Put it all in a single country-specific fund',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'A client will need the money in only 1 to 2 years. Which funds are suitable?',
+      options: [
+        'Country-specific funds',
+        'Small-to-mid cap funds',
+        'Money market or bond funds',
+        'Sectoral or thematic funds',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why are big-cap funds generally less volatile?',
+      options: [
+        'Big companies are well established and stable, and focus on paying dividends',
+        'Big-cap funds invest mostly in fixed deposits',
+        'Big-cap funds are guaranteed by the government',
+        'Big companies grow faster than small companies',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'What makes a "flexi" fund different?',
+      options: [
+        'It can only invest in small companies',
+        'The fund manager is free to decide how much goes into equities and how much into bonds',
+        'It invests only in one country',
+        'Investors can withdraw without any charges',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'A new client has RM10,000 to invest from EPF. Following the agency\'s guideline, how many funds should you start with?',
+      options: ['1 fund', '2 funds', '4 funds', '6 funds'],
+      correct: 1,
+    },
+    {
+      qtype: 'tf',
+      text: 'For a low-risk client investing from EPF, putting the money into a money market or bond fund is recommended.',
+      options: TF,
+      correct: 1,
+    },
+  ],
+
   // Module 4 — 3 Simple Rules
   4: [
     {
