@@ -95,6 +95,93 @@ module.exports = {
     },
   ],
 
+  // Module 2 — What is Unit Trust & What-if Analysis Presentation
+  2: [
+    {
+      qtype: 'mc',
+      text: 'Before presenting to a new prospect, what is the first question you should ask?',
+      options: [
+        '"How much money do you have?"',
+        '"Are you doing any form of investment at the moment?"',
+        '"Which fund do you want to buy?"',
+        '"Can I have your IC?"',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'In the simplest terms, how does a unit trust work?',
+      options: [
+        'The bank lends your money to other customers',
+        'Many investors pool their money, and professional fund managers invest it for them',
+        'You buy shares directly on the stock exchange yourself',
+        'The government guarantees a fixed return',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is the role of the trustee in a unit trust?',
+      options: [
+        'To sell the fund to investors',
+        'To pick the shares the fund buys',
+        'To hold investors\' money safely and supervise that the fund manager invests according to the fund\'s objectives',
+        'To set the sales charge',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'tf',
+      text: 'If the fund management company goes bankrupt, investors lose their money because it is held by the fund manager.',
+      options: TF,
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is the adviser\'s role in the unit trust picture?',
+      options: [
+        'To manage the fund\'s daily share trading',
+        'To act as the trustee',
+        'To sit between the investor and the funds, choosing the right funds for the investor',
+        'To audit the fund house',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Which of these is NOT a benefit of unit trust?',
+      options: [
+        'Professional management',
+        'Diversification across many shares with small capital',
+        'A guaranteed return',
+        'High liquidity — you can sell any time',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'What are the three ways a client can invest in unit trust?',
+      options: [
+        'Cash, EPF, and PRS',
+        'Cash, credit card, and personal loan',
+        'EPF, SOCSO, and insurance',
+        'Shares, bonds, and gold',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'When preparing a What-if Analysis, how should you choose the initial investment amount?',
+      options: [
+        'Always use RM100,000',
+        'Always use RM1,000',
+        'Match it to the prospect\'s background — e.g. around RM5,000–10,000 for a fresh graduate, more for someone in their 40s',
+        'Use the largest amount the system allows',
+      ],
+      correct: 2,
+    },
+  ],
+
   // Module 3 — Effective Presentation to Close EPF Sales
   3: [
     {
