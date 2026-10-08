@@ -83,6 +83,18 @@ module.exports = {
       ],
       correct: 3,
     },
+    {
+      qtype: 'mc',
+      text: 'In which year did EPF introduce the Members Investment Scheme?',
+      options: ['1986', '1996', '2006', '2016'],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'Under the restructured EPF accounts, what share of each monthly contribution goes into Account 1 (Akaun Persaraan)?',
+      options: ['50%', '60%', '75%', '90%'],
+      correct: 2,
+    },
   ],
 
   // Module 6 — Closing Techniques
@@ -162,6 +174,28 @@ module.exports = {
         'Visualise the client agreeing, choosing the funds and signing the forms, then lead the conversation towards that outcome',
         'Start the meeting by showing the closing slide',
         'Decide in advance that the client probably won\'t buy',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'At a first EPF presentation, what outcome should you aim to leave with — even if the client hasn\'t decided how much to invest?',
+      options: [
+        'A promise to call them next month',
+        'The EPF documents signed, so you can check how much they are eligible to invest',
+        'Their bank account number',
+        'Nothing — the first meeting is only for education',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'After the client has answered your alternative-choice question, what is a simple final step to move into the close?',
+      options: [
+        'Ask "Are you sure you want to go ahead?"',
+        'Ask "Can I have your IC?" and get the forms ready',
+        'Give them the brochure to take home',
+        'Start the presentation again from the beginning',
       ],
       correct: 1,
     },
@@ -247,6 +281,28 @@ module.exports = {
       options: TF,
       correct: 1,
     },
+    {
+      qtype: 'mc',
+      text: 'Where does a Greater China fund invest?',
+      options: [
+        'China only',
+        'China, Hong Kong and Taiwan',
+        'China, Japan and Korea',
+        'All of Asia including Japan',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'On the agency\'s fund chart, unit trust risk levels run from 1 to 5. What does level 5 mean?',
+      options: [
+        'The lowest risk, like money market',
+        'A medium-risk balanced fund',
+        'The highest risk',
+        'The fund is not EPF-approved',
+      ],
+      correct: 2,
+    },
   ],
 
   // Module 4 — 3 Simple Rules
@@ -321,6 +377,28 @@ module.exports = {
         'The market\'s ups and downs along the way',
         'Choosing the wrong fund',
         'The fixed deposit option',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'How does the right way to invest in unit trust differ from trading the stock market?',
+      options: [
+        'Stock market: buy and wait. Unit trust: wait and buy',
+        'Stock market: wait and buy. Unit trust: buy and wait',
+        'Both should be bought and sold quickly for small gains',
+        'Both should only be bought when the market is at its lowest',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'Besides reinvested distributions, what is the second "secret" that helps unit trust returns keep stacking up over the long term?',
+      options: [
+        'The fund keeps the same shares forever',
+        'The fund manager keeps switching into the most promising shares as the market changes',
+        'The fund house guarantees a minimum return each year',
+        'The investor switches funds every few months',
       ],
       correct: 1,
     },
