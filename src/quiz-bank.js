@@ -97,6 +97,105 @@ module.exports = {
     },
   ],
 
+  // Module 8 — Proven Game Plan for Success
+  8: [
+    {
+      qtype: 'mc',
+      text: 'What are the three categories of business in the game plan?',
+      options: [
+        'EPF scheme, cash investment, and regular savings plan',
+        'Insurance, property, and stocks',
+        'Fixed deposits, bonds, and gold',
+        'Recruitment, training, and events',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why is EPF business described as "repeat" sales?',
+      options: [
+        'The client must reinvest every month by law',
+        'Once a client starts, they can top up again from EPF every quarter',
+        'EPF automatically doubles the investment each year',
+        'The adviser earns the same commission twice on each sale',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'Comparing the same amount of sales, which generally pays the adviser a higher commission rate?',
+      options: [
+        'EPF investment',
+        'Cash investment',
+        'Both pay exactly the same',
+        'Neither — commission is a fixed monthly amount',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is the recommended balance between EPF and cash business?',
+      options: [
+        'Only EPF — never cash',
+        'Only cash — never EPF',
+        'Roughly half and half, or around 60% cash and 40% EPF',
+        '90% regular savings and 10% everything else',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'tf',
+      text: 'At Manulife, once you meet the minimum sales for the next level, your promotion and higher commission rate come automatically — no need to apply or get a boss\'s approval.',
+      options: TF,
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is the regular savings plan (RSP) game plan described in the module?',
+      options: [
+        'Close one RM5,000 lump sum a week for 6 months',
+        'Close one case a day with RM500 monthly savings, for 24 months',
+        'Close one RM100 case a month for 10 years',
+        'Convert all EPF clients into RSP',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'On which dates each month are regular savings plan auto-deductions made?',
+      options: ['1st and 15th', '5th and 20th', '10th and 28th', 'Last working day only'],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why should you monitor your regular savings plan clients\' deductions?',
+      options: [
+        'To check the fund price every day',
+        'Many clients use a separate account for the deduction and may forget to transfer money into it',
+        'Because the deduction amount changes every month',
+        'Because the company does not record the deductions',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'How can a long-serving adviser earn more commission with similar or even lower sales than in earlier years?',
+      options: [
+        'Commission rates are doubled after 10 years',
+        'Career benefits and group overriding build up as passive income',
+        'Senior advisers charge clients higher fees',
+        'They only sell cash investment',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'tf',
+      text: 'To succeed in this business you need to be an extrovert with a sales background.',
+      options: TF,
+      correct: 1,
+    },
+  ],
+
   // Module 7 — Crisis Proof Your Clients
   7: [
     {
