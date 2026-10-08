@@ -49,6 +49,22 @@ async function migrate() {
       );
     }
   }
+  // Load drafted quiz questions for any module that has none yet (lands as a draft for admin approval).
+  const QUIZ_BANK = require('./quiz-bank');
+  for (const [pos, questions] of Object.entries(QUIZ_BANK)) {
+    const v = await one(
+      `SELECT v.id, (SELECT count(*)::int FROM questions WHERE video_id=v.id) AS n
+         FROM videos v WHERE v.kind='module' AND v.position=$1`, [Number(pos)]);
+    if (!v || v.n > 0) continue;
+    for (const [i, qq] of questions.entries()) {
+      await pool.query(
+        'INSERT INTO questions (video_id, position, qtype, text, options, correct) VALUES ($1,$2,$3,$4,$5,$6)',
+        [v.id, i + 1, qq.qtype, qq.text, JSON.stringify(qq.options), qq.correct]);
+    }
+    await pool.query(`UPDATE videos SET quiz_status='draft' WHERE id=$1 AND quiz_status='none'`, [v.id]);
+    console.log(`Loaded ${questions.length} draft quiz questions for module ${pos}`);
+  }
+
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
     await pool.query('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [key, value]);
   }
