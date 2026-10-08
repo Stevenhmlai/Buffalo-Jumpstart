@@ -8,6 +8,93 @@
 const TF = ['True', 'False'];
 
 module.exports = {
+  // Module 1 — Introduction to Jumpstart and My Market Prospecting List
+  1: [
+    {
+      qtype: 'mc',
+      text: 'What is the main objective of Buffalo Jumpstart?',
+      options: [
+        'To pass the licensing exam',
+        'To give you the essential skills and materials to go out and close your first case',
+        'To learn how to trade stocks',
+        'To recruit new advisers into your team',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'Advisers fall into three types. Which group is the agency\'s training mainly designed to help?',
+      options: [
+        'The 10% self-starters who figure it out on their own',
+        'The group who will not succeed no matter what',
+        'The 70% who can do as well as the top 10% with training and guidance',
+        'Only advisers with an investment background',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Who should be the very first unit trust account you open?',
+      options: ['Your parents', 'Your closest friend', 'Yourself', 'A retiree'],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'A prospect already invests with another unit trust company. What is the recommended approach?',
+      options: [
+        'Point out that the other company performs badly',
+        'Never criticise the competitor — suggest diversifying some money into Manulife funds they can\'t get elsewhere',
+        'Tell them to redeem everything and switch over immediately',
+        'Give up on the prospect',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'The "local tour guide in Brazil" analogy explains which Manulife advantage?',
+      options: [
+        'Lower sales charges',
+        'Overseas funds managed by Manulife\'s own teams based in those countries, who know the local market best',
+        'A wider range of local Malaysian funds',
+        'Free overseas trips for advisers',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is your prospecting assignment in the first week?',
+      options: [
+        'List 10 names',
+        'List 50 names',
+        'List 100 names on the prospecting list',
+        'Call 20 strangers',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'When you are new, which prospects should you approach first, and why?',
+      options: [
+        'Your cold list (strangers), because they have no bias',
+        'Your warm list (people who know you), because they are more forgiving while you are still learning',
+        'Only wealthy business owners',
+        'Retirees only, because they have the most money',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'At a wedding dinner or social gathering, what is the right "above the line" approach?',
+      options: [
+        'Try to close everyone at the table',
+        'Simply let people know what you do, and follow up later only with those who show interest',
+        'Avoid mentioning your business at all',
+        'Hand out application forms',
+      ],
+      correct: 1,
+    },
+  ],
+
   // Module 3 — Effective Presentation to Close EPF Sales
   3: [
     {
