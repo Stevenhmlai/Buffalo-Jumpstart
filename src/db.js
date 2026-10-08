@@ -52,17 +52,25 @@ async function migrate() {
   // Load drafted quiz questions for any module that has none yet (lands as a draft for admin approval).
   const QUIZ_BANK = require('./quiz-bank');
   for (const [pos, questions] of Object.entries(QUIZ_BANK)) {
-    const v = await one(
-      `SELECT v.id, (SELECT count(*)::int FROM questions WHERE video_id=v.id) AS n
-         FROM videos v WHERE v.kind='module' AND v.position=$1`, [Number(pos)]);
-    if (!v || v.n > 0) continue;
+    const v = await one(`SELECT id, quiz_status FROM videos WHERE kind='module' AND position=$1`, [Number(pos)]);
+    if (!v || v.quiz_status === 'approved') continue;       // never change a live quiz
+    const existing = await all('SELECT text FROM questions WHERE video_id=$1', [v.id]);
+    const bankTexts = new Set(questions.map((x) => x.text));
+    // Only top up a draft that still holds nothing but bank questions (i.e. untouched by an admin).
+    if (existing.some((r) => !bankTexts.has(r.text))) continue;
+    const have = new Set(existing.map((r) => r.text));
+    let added = 0;
     for (const [i, qq] of questions.entries()) {
+      if (have.has(qq.text)) continue;
       await pool.query(
         'INSERT INTO questions (video_id, position, qtype, text, options, correct) VALUES ($1,$2,$3,$4,$5,$6)',
         [v.id, i + 1, qq.qtype, qq.text, JSON.stringify(qq.options), qq.correct]);
+      added++;
     }
-    await pool.query(`UPDATE videos SET quiz_status='draft' WHERE id=$1 AND quiz_status='none'`, [v.id]);
-    console.log(`Loaded ${questions.length} draft quiz questions for module ${pos}`);
+    if (added) {
+      await pool.query(`UPDATE videos SET quiz_status='draft' WHERE id=$1 AND quiz_status='none'`, [v.id]);
+      console.log(`Loaded ${added} draft quiz questions for module ${pos}`);
+    }
   }
 
   for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
