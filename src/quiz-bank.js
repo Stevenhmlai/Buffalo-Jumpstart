@@ -97,6 +97,115 @@ module.exports = {
     },
   ],
 
+  // Module 7 — Crisis Proof Your Clients
+  7: [
+    {
+      qtype: 'mc',
+      text: 'Which of these is NOT a reason for crisis-proofing your clients?',
+      options: [
+        'Helping clients stay calm during a crisis',
+        'Avoiding panic redemptions at the wrong time',
+        'Guaranteeing that the client\'s investment will never fall in value',
+        'Getting clients to top up and stay invested with you for life',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Driven by the emotional cycle of investing, what do many investors end up doing?',
+      options: [
+        'Buying low and selling high',
+        'Buying high and selling low',
+        'Investing a fixed amount every month',
+        'Never selling at all',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What are the three criteria of a good investment decision?',
+      options: [
+        'Clear mind, good discipline, and emotional distance',
+        'High return, low risk, and short holding period',
+        'Lowest fees, biggest fund, and newest fund',
+        'Good timing, insider tips, and quick switching',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'Before you can help clients manage their emotions during a crisis, what must you do first?',
+      options: [
+        'Memorise every fund\'s daily price',
+        'Manage your own emotions',
+        'Get approval from the fund house',
+        'Switch all clients into money market',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What is the "magic paper"?',
+      options: [
+        'The fund\'s prospectus',
+        'A printed What-if Analysis that you can circle, highlight and draw on while presenting',
+        'The client\'s EPF statement',
+        'The account opening form',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'In the first year, the What-if Analysis may show the investment value below the FD line. What mainly causes this, and how should you describe it?',
+      options: [
+        'The fund is performing badly — suggest switching',
+        'The sales charge — explain openly that this is normal',
+        'A calculation error — ignore that part of the chart',
+        'Market manipulation — warn the client',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'During a market crisis, what are the only two things a client should do?',
+      options: [
+        'Sell everything, or switch to FD',
+        'Top up if they have extra money, or stay invested and do nothing',
+        'Stop the monthly investment, or redeem half',
+        'Wait for the news, or move to another fund house',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'In the "child struggling at school" analogy, what does sending the child for tuition represent?',
+      options: [
+        'Redeeming the investment',
+        'Switching to a different fund house',
+        'Topping up the investment',
+        'Stopping the monthly saving plan',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why do you ask the client, "Do you want me to inform you when there\'s a great opportunity?"',
+      options: [
+        'So you have their permission to text them to top up later, without presenting all over again',
+        'So you can add them to a marketing mailing list',
+        'Because it is a compliance requirement',
+        'To find out whether they have other advisers',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'tf',
+      text: 'Successful investing is about time in the market, not timing the market.',
+      options: TF,
+      correct: 0,
+    },
+  ],
+
   // Module 6 — Closing Techniques
   6: [
     {
