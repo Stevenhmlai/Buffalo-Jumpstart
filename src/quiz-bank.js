@@ -8,6 +8,83 @@
 const TF = ['True', 'False'];
 
 module.exports = {
+  // Module 3 — Effective Presentation to Close EPF Sales
+  3: [
+    {
+      qtype: 'mc',
+      text: 'Which EPF account can a member withdraw from to invest in unit trust under the EPF Members Investment Scheme?',
+      options: [
+        'Account 1 (Akaun Persaraan)',
+        'Account 2 (Akaun Sejahtera)',
+        'Account 3 (Akaun Fleksibel)',
+        'Any of the three accounts',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why do we describe EPF money as "sleeping money"?',
+      options: [
+        'Because members cannot see their balance until retirement',
+        'Because EPF follows a prudent policy — only around 40% is in equities and most of the rest is in low-risk fixed income',
+        'Because EPF pays no dividend in some years',
+        'Because the money is mostly invested overseas',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'A client aged 41 has RM123,000 in Account 1. The basic savings required at age 41 is RM93,000, and a member may invest 30% of the amount above basic savings. How much can the client invest?',
+      options: ['RM30,000', 'RM36,900', 'RM9,000', 'RM27,900'],
+      correct: 2,
+    },
+    {
+      qtype: 'tf',
+      text: 'A client can withdraw from EPF to invest in unit trust as often as they like.',
+      options: TF,
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What are the two main criteria EPF uses to decide whether a fund is an EPF-approved fund?',
+      options: [
+        'Fund size and fund age',
+        'Consistency of performance, and performance relative to its benchmark',
+        'Lowest management fee and lowest sales charge',
+        'Number of investors and number of agents selling it',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'A prospect says, "I don\'t want to touch my EPF money." What is the recommended way to respond?',
+      options: [
+        'Tell them they are wrong and EPF returns are poor',
+        'Drop EPF and only offer cash investment',
+        'Agree to disagree — agree EPF shouldn\'t be used for other things, then show how investing it grows their retirement fund, which is what EPF is for',
+        'Suggest they withdraw from the flexible account instead',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'tf',
+      text: 'Investing through the EPF scheme usually costs the client a lower sales charge than investing with cash.',
+      options: TF,
+      correct: 0,
+    },
+    {
+      qtype: 'mc',
+      text: 'For a first-time EPF investment client, which of these is NOT part of the submission?',
+      options: [
+        'Account opening form (with PDPA consent and suitability assessment)',
+        'Thumbprint form',
+        'Two copies of IC (front and back on one A4 page), one certified',
+        'Latest 3 months\' payslips',
+      ],
+      correct: 3,
+    },
+  ],
+
   // Module 4 — 3 Simple Rules
   4: [
     {
