@@ -85,6 +85,88 @@ module.exports = {
     },
   ],
 
+  // Module 6 — Closing Techniques
+  6: [
+    {
+      qtype: 'mc',
+      text: 'Which two closing techniques are described as the most effective for unit trust?',
+      options: [
+        'Fire-sale close and empathy close',
+        'Assumptive close and alternative-choice close',
+        'Calendar close and diagram close',
+        '1-2-3 close and customer-care close',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'Why should you avoid asking a yes/no question like "Do you want to start investing now?"',
+      options: [
+        'It sounds too formal',
+        'It takes too long for the client to answer',
+        'It gives the client an easy chance to say "I want to consider first"',
+        'It is not allowed by the compliance rules',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Which of these is a good alternative-choice closing question?',
+      options: [
+        '"Do you want to invest or not?"',
+        '"Would you prefer letter statements or e-statements?"',
+        '"Should I come back next month?"',
+        '"Do you need more time to think?"',
+      ],
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'You have just asked the client a closing question. What should you do next?',
+      options: [
+        'Keep talking so the silence doesn\'t feel awkward',
+        'Remind them they can take time to consider',
+        'Stay calm and silent, and wait for the client to answer',
+        'Move on to the next slide',
+      ],
+      correct: 2,
+    },
+    {
+      qtype: 'mc',
+      text: 'Which of these is a buying signal from a client?',
+      options: [
+        '"What do I need to open the account?"',
+        'Checking the time and looking around the room',
+        '"Can you send me the slides to read later?"',
+        'Changing the subject to something unrelated',
+      ],
+      correct: 0,
+    },
+    {
+      qtype: 'tf',
+      text: 'If a client shows a strong buying signal halfway through your presentation, you should finish presenting all your slides before moving to the close.',
+      options: TF,
+      correct: 1,
+    },
+    {
+      qtype: 'tf',
+      text: 'Good salespeople are born that way — closing is not a skill that can be learned through practice.',
+      options: TF,
+      correct: 1,
+    },
+    {
+      qtype: 'mc',
+      text: 'What does "begin with the end in mind" mean before a client meeting?',
+      options: [
+        'Plan to end the meeting early',
+        'Visualise the client agreeing, choosing the funds and signing the forms, then lead the conversation towards that outcome',
+        'Start the meeting by showing the closing slide',
+        'Decide in advance that the client probably won\'t buy',
+      ],
+      correct: 1,
+    },
+  ],
+
   // Module 5 — Basic Portfolio Management
   5: [
     {
